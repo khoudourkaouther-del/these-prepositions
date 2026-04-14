@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Médiateur Cognitif — Les Prépositions</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #185FA5;
+    --blue-dark: #0C447C;
+    --blue-light: #E6F1FB;
+    --blue-text: #042C53;
+    --green: #1D9E75;
+    --green-light: #EAF3DE;
+    --green-text: #3B6D11;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-text: #A32D2D;
+    --gray-bg: #F5F5F3;
+    --gray-card: #ffffff;
+    --gray-border: rgba(0,0,0,0.12);
+    --gray-border-strong: rgba(0,0,0,0.22);
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+    --text-hint: #999;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gray-bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--blue);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header h1 { font-size: 16px; font-weight: 500; }
+  .header p { font-size: 12px; opacity: 0.75; }
+
+  .container { max-width: 780px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  /* Écran d'accueil */
+  #screen-accueil { text-align: center; padding: 2rem 1rem; }
+  #screen-accueil h2 { font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+  #screen-accueil p { color: var(--text-secondary); margin-bottom: 24px; font-size: 15px; line-height: 1.6; }
+  .welcome-card {
+    background: var(--gray-card);
+    border: 0.5px solid var(--gray-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+  .welcome-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+  .welcome-card ul { padding-left: 1.2rem; color: var(--text-secondary); font-size: 14px; line-height: 2; }
+
+  /* Phase bar */
+  .phase-bar {
+    display: flex;
+    background: var(--gray-card);
+    border: 0.5px solid var(--gray-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .phase-btn {
+    flex: 1; padding: 10px 8px;
+    border: none; background: transparent;
+    font-size: 13px; cursor: pointer;
+    color: var(--text-secondary);
+    border-right: 0.5px solid var(--gray-border);
+    transition: background 0.15s;
+  }
+  .phase-btn:last-child { border-right: none; }
+  .phase-btn.active { background: var(--blue); color: #fff; font-weight: 500; }
+  .phase-btn.done { background: var(--green-light); color: var(--green-text); }
+
+  /* Cards */
+  .card {
+    background: var(--gray-card);
+    border: 0.5px solid var(--gray-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 500; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px;
+  }
+
+  /* Exercise */
+  .exercise-list { list-style: none; }
+  .exercise-item {
+    display: flex; align-items: center; gap: 4px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--gray-border);
+    font-size: 15px; line-height: 1.5; flex-wrap: wrap;
+  }
+  .exercise-item:last-child { border-bottom: none; }
+  .ex-num {
+    font-size: 12px; color: var(--text-hint);
+    min-width: 20px;
+  }
+
+  input.fill-blank {
+    border: none;
+    border-bottom: 2px solid var(--blue);
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 15px;
+    width: 72px;
+    text-align: center;
+    outline: none;
+    padding: 2px 4px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  input.fill-blank:focus { border-bottom-color: var(--blue-dark); }
+  input.fill-blank.wrong { border-bottom-color: var(--red); color: var(--red); }
+  input.fill-blank.correct { border-bottom-color: var(--green); color: var(--green); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 22px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    border: 0.5px solid var(--gray-border-strong);
+    background: var(--gray-bg);
+    color: var(--text-primary);
+  }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff;
+    border-color: var(--blue);
+  }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-danger { background: var(--red-light); color: var(--red-text); border-color: var(--red); }
+
+  /* Tags */
+  .tag-wrong {
+    display: inline-block;
+    background: var(--red-light); color: var(--red-text);
+    border-radius: 6px; font-size: 12px;
+    padding: 3px 9px; font-weight: 500;
+  }
+  .tag-correct {
+    display: inline-block;
+    background: var(--green-light); color: var(--green-text);
+    border-radius: 6px; font-size: 12px;
+    padding: 3px 9px; font-weight: 500;
+  }
+
+  /* Error phrase */
+  .error-phrase {
+    color: var(--red-text);
+    background: var(--red-light);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-weight: 500;
+  }
+
+  /* Progress bar */
+  .progress-bg {
+    background: var(--gray-bg);
+    border-radius: 4px; height: 6px; margin: 8px 0;
+  }
+  .progress-fill {
+    height: 6px; border-radius: 4px;
+    background: var(--green);
+    transition: width 0.4s ease;
+  }
+
+  /* Chat */
+  .chat-area { display: flex; flex-direction: column; gap: 8px; }
+  .chat-bubble {
+    background: var(--blue-light); color: var(--blue-text);
+    border-radius: var(--radius-lg);
+    border-top-left-radius: 4px;
+    padding: 12px 16px;
+    font-size: 15px; line-height: 1.65;
+    max-width: 90%;
+  }
+  .chat-bubble.user {
+    background: #F0F0EE;
+    color: var(--text-primary);
+    margin-left: auto;
+    border-top-right-radius: 4px;
+    border-top-left-radius: var(--radius-lg);
+    font-style: italic;
+  }
+  .chat-bubble.system {
+    background: var(--green-light); color: var(--green-text);
+    border-radius: var(--radius);
+    font-size: 14px;
+  }
+
+  /* QCM options */
+  .options-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .option-btn {
+    text-align: left; padding: 10px 14px;
+    border: 0.5px solid var(--gray-border-strong);
+    border-radius: var(--radius);
+    background: var(--gray-card);
+    color: var(--text-primary);
+    font-size: 14px; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .option-btn:hover:not(:disabled) { background: var(--gray-bg); }
+  .option-btn.ok { background: var(--green-light); border-color: #97C459; color: var(--green-text); }
+  .option-btn.ko { background: var(--red-light); border-color: #F09595; color: var(--red-text); }
+
+  /* Text answer */
+  textarea.student-input {
+    width: 100%;
+    border: 0.5px solid var(--gray-border-strong);
+    border-radius: var(--radius);
+    background: var(--gray-card);
+    color: var(--text-primary);
+    font-family: inherit; font-size: 14px;
+    padding: 10px 12px;
+    resize: vertical; min-height: 80px;
+    outline: none; margin-top: 8px;
+  }
+  textarea.student-input:focus { border-color: var(--blue); }
+
+  /* Analysis */
+  .analysis-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--gray-border);
+  }
+  .analysis-row:last-child { border-bottom: none; }
+
+  /* Metric cards */
+  .metrics { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .metric {
+    flex: 1; min-width: 100px;
+    background: var(--gray-bg);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+  }
+  .metric-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-val { font-size: 26px; font-weight: 500; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; color: #fff;
+    padding: 10px 20px; border-radius: var(--radius);
+    font-size: 13px; z-index: 100;
+    opacity: 0; transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 500px) {
+    .phase-btn { font-size: 11px; padding: 8px 4px; }
+    .exercise-item { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Médiateur Cognitif — Les Prépositions</h1>
+    <p id="header-student">Entrez votre nom pour commencer</p>
+  </div>
+  <div id="header-score" style="text-align:right; display:none;">
+    <p style="font-size:13px; opacity:0.9;" id="score-display">—</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══ ÉCRAN ACCUEIL ═══ -->
+  <div id="screen-accueil">
+    <div class="welcome-card">
+      <h3>Identification</h3>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+        <div>
+          <label style="font-size:13px; color:var(--text-secondary); display:block; margin-bottom:4px;">Nom et prénom</label>
+          <input type="text" id="input-nom" placeholder="ex : Amina Bouzidi"
+            style="width:100%; padding:10px 12px; border:0.5px solid var(--gray-border-strong);
+            border-radius:var(--radius); font-size:15px; font-family:inherit; outline:none;">
+        </div>
+        <div>
+          <label style="font-size:13px; color:var(--text-secondary); display:block; margin-bottom:4px;">Classe / Groupe</label>
+          <input type="text" id="input-classe" placeholder="ex : 3AM groupe 2"
+            style="width:100%; padding:10px 12px; border:0.5px solid var(--gray-border-strong);
+            border-radius:var(--radius); font-size:15px; font-family:inherit; outline:none;">
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-card">
+      <h3>Déroulement de l'activité</h3>
+      <ul>
+        <li><strong>Phase 1</strong> — Exercice à trous : complétez les phrases avec la bonne préposition</li>
+        <li><strong>Phase 2</strong> — Vos erreurs seront analysées automatiquement</li>
+        <li><strong>Phase 3</strong> — Le médiateur vous guide par des questions pour comprendre vos erreurs</li>
+      </ul>
+    </div>
+
+    <button class="btn btn-primary" onclick="demarrer()" style="width:100%; padding:13px; font-size:15px;">
+      Commencer l'activité →
+    </button>
+  </div>
+
+  <!-- ═══ ÉCRAN PRINCIPAL ═══ -->
+  <div id="screen-main" class="hidden">
+
+    <div class="phase-bar">
+      <button class="phase-btn active" id="btn-obs" onclick="showPhase('observation')">① Observation</button>
+      <button class="phase-btn" id="btn-ana" onclick="showPhase('analyse')">② Analyse</button>
+      <button class="phase-btn" id="btn-med" onclick="showPhase('mediation')">③ Médiation</button>
+    </div>
+
+    <!-- ── PHASE 1 ── -->
+    <div id="phase-observation">
+      <div class="card">
+        <p class="section-label">Exercice à trous — Complétez avec la bonne préposition</p>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+          Choisissez parmi : <strong>à, de, en, dans, sur, pour, avec, chez, par, vers</strong>
+        </p>
+        <ul class="exercise-list" id="exercise-container"></ul>
+        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="submitObservation()">Soumettre les réponses</button>
+          <button class="btn" onclick="resetExercise()">Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="obs-results" class="hidden">
+        <div class="card">
+          <p class="section-label">Résultats — Vos réponses</p>
+          <div id="error-summary"></div>
+          <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="showPhase('analyse')">Voir l'analyse →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHASE 2 ── -->
+    <div id="phase-analyse" class="hidden">
+      <div class="card">
+        <p class="section-label">Analyse des erreurs</p>
+        <div id="analysis-content"></div>
+      </div>
+      <div class="card">
+        <p class="section-label">Votre profil</p>
+        <div id="learner-profile"></div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="showPhase('mediation')">Lancer la médiation →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PHASE 3 ── -->
+    <div id="phase-mediation" class="hidden">
+      <div class="card">
+        <p class="section-label">Médiation cognitive — Guidage par questionnement</p>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:8px;">
+          Le médiateur ne donne pas la réponse directement. Il vous guide par des questions progressives.
+        </p>
+        <div class="progress-bg"><div class="progress-fill" id="med-progress" style="width:0%"></div></div>
+        <p style="font-size:12px; color:var(--text-secondary);" id="progress-label">Lacune 1</p>
+      </div>
+      <div id="mediation-area"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     CONFIGURATION — À MODIFIER AVANT DÉPLOIEMENT
+     ═══════════════════════════════════════════════════════ -->
+<script>
+/*
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  ÉTAPE 1 — Créez votre Google Apps Script                       │
+  │                                                                 │
+  │  1. Allez sur script.google.com                                 │
+  │  2. Créez un nouveau projet                                     │
+  │  3. Collez le code Apps Script fourni dans le fichier           │
+  │     "apps_script.gs" livré avec ce HTML                        │
+  │  4. Cliquez "Déployer" → "Nouveau déploiement"                 │
+  │     → Type : Application Web                                    │
+  │     → Accès : Tout le monde                                     │
+  │  5. Copiez l'URL générée et collez-la ci-dessous               │
+  └─────────────────────────────────────────────────────────────────┘
+*/
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyg4ou2LuP76P_7c1Vey9ah_VNBTJ7M7bEjgd1ENNrR9z2VzrtlJrxH35eiIkUS3dUTLA/exec";
+// Exemple : "https://script.google.com/macros/s/AKfy.../exec"
+
+const NOM_ETUDE = "Prépositions — Mémoire 2025";
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DONNÉES
+// ═══════════════════════════════════════════════════════
+
+const sentences = [
+  { id:0, full:"Je vais ___ Paris demain.", answer:"à", context:"destination_ville", options:["à","en","dans","vers"], errorType:"Destination : ville" },
+  { id:1, full:"Elle habite ___ Lyon depuis deux ans.", answer:"à", context:"habiter_ville", options:["à","en","dans","chez"], errorType:"Destination : ville" },
+  { id:2, full:"Il voyage ___ avion chaque mois.", answer:"en", context:"moyen_transport", options:["en","par","avec","à"], errorType:"Moyen de transport" },
+  { id:3, full:"Ce livre est ___ mon professeur.", answer:"de", context:"appartenance", options:["de","à","par","pour"], errorType:"Appartenance (de)" },
+  { id:4, full:"Nous sommes nés ___ Algérie.", answer:"en", context:"pays_fem", options:["en","au","à","dans"], errorType:"Pays féminins (en)" },
+  { id:5, full:"Il parle ___ son voyage.", answer:"de", context:"parler_de", options:["de","sur","à","pour"], errorType:"Verbe + préposition (parler de)" },
+  { id:6, full:"Je pense ___ toi souvent.", answer:"à", context:"penser_a", options:["à","de","sur","pour"], errorType:"Verbe + préposition (penser à)" },
+  { id:7, full:"Elle met le vase ___ la table.", answer:"sur", context:"position", options:["sur","dans","à","en"], errorType:"Prépositions spatiales" },
+];
+
+const mediationDialogs = {
+  destination_ville: { label:"Destination : ville",
+    steps:[
+      { type:"question", text:"Regarde la phrase en rouge. Tu as écrit une préposition pour indiquer qu'on va dans une ville. En arabe, quand tu dis « أنا رايح لـ الجزائر »  — y a-t-il une petite marque de direction ? Est-ce que le français fait pareil ?" },
+      { type:"qcm", text:"En français, pour indiquer qu'on va dans une ville (Paris, Lyon, Oran…), quelle préposition utilise-t-on ?", options:["à","en","dans","vers"], correct:"à", fw:"Pas tout à fait. « en » s'utilise avec les pays féminins, pas les villes. « dans » désigne un espace physique. « vers » indique une direction vague. Il y a une préposition très courte, très fréquente pour les villes…", fc:"Exactement ! Pour toutes les villes, on utilise « à » : à Paris, à Alger, à Lyon. C'est une règle fixe." },
+      { type:"question", text:"Bien ! Maintenant, essaie de former toi-même deux phrases avec la même structure : une avec Rome et une avec Oran." },
+      { type:"qcm", text:"Attention, pour les pays la règle change. « Je vais ___ France » — quelle préposition ?", options:["à","en","au","dans"], correct:"en", fw:"Rappel : les pays féminins (France, Algérie, Espagne…) ne prennent pas « à ». « au » c'est pour les pays masculins (au Maroc, au Japon). Pour les pays féminins ?", fc:"Bien ! Pays féminin → « en ». Pays masculin → « au ». Ville → « à ». Tu peux maintenant distinguer les trois cas ?" },
+    ]
+  },
+  habiter_ville: { label:"Habiter + ville",
+    steps:[
+      { type:"question", text:"La phrase en rouge parle d'un lieu de résidence. En arabe, comment dit-on « elle vit à Lyon » ? Y a-t-il une particule qui indique le lieu ?" },
+      { type:"qcm", text:"Pour indiquer le lieu où quelqu'un habite (une ville précise), quelle préposition emploie-t-on ?", options:["à","en","dans","chez"], correct:"à", fw:"« chez » s'utilise avec une personne (chez Pierre, chez ma tante). « en » avec un pays féminin. « dans » avec un espace général (dans le quartier). Pour une ville précise comme Lyon ?", fc:"Oui ! Habiter à + ville. Elle habite à Lyon, à Béjaïa, à Marseille. C'est la même préposition que pour « aller à »." },
+    ]
+  },
+  moyen_transport: { label:"Moyen de transport",
+    steps:[
+      { type:"question", text:"Dans la phrase en rouge, il s'agit d'un moyen de transport. Quand tu prends l'avion, où es-tu physiquement ? À l'intérieur ou à l'extérieur ?" },
+      { type:"qcm", text:"On est à l'intérieur de l'avion pendant le voyage. Quelle préposition exprime l'idée d'utiliser un véhicule qu'on occupe de l'intérieur ?", options:["en","par","avec","à"], correct:"en", fw:"Pense à l'image : on entre dans l'avion, on s'assoit dedans, on est enfermé. « avec » s'utilise pour un outil ou une compagnie. « par » introduit un agent ou un moyen très général. Quelle préposition évoque le fait d'être à l'intérieur ?", fc:"Oui ! On voyage en avion, en voiture, en train — on est à l'intérieur. Mais à vélo, à pied — car on n'est pas « enfermé » dedans." },
+      { type:"question", text:"Maintenant classe ces mots avec la bonne préposition : voiture / vélo / bus / pied / moto. Laquelle prend « en » et laquelle prend « à » ?" },
+    ]
+  },
+  appartenance: { label:"Appartenance (de)",
+    steps:[
+      { type:"question", text:"La phrase en rouge exprime à qui appartient un objet. En arabe, l'appartenance s'exprime souvent avec « لـ » (li-). En français, quelle petite préposition permet de dire qu'une chose appartient à quelqu'un dans la structure « c'est le livre ___ Pierre » ?" },
+      { type:"qcm", text:"Pour relier un objet à son propriétaire dans « c'est le livre ___ Pierre », on utilise :", options:["de","à","par","pour"], correct:"de", fw:"Attention : « à » indique une destination ou un lien indirect (donner quelque chose à quelqu'un). Pour l'appartenance dans cette construction nominale, c'est une autre préposition. Pensez à « le livre DE Pierre ».", fc:"Exact ! Le livre de Pierre, la voiture de ma mère, le stylo de l'élève. « de » + nom = appartenance dans le groupe nominal." },
+    ]
+  },
+  pays_fem: { label:"Pays féminins",
+    steps:[
+      { type:"question", text:"La phrase en rouge parle d'un pays. En français, les pays ont un genre (masculin ou féminin). Est-ce que « Algérie » est masculin ou féminin ? Comment peut-on le savoir ?" },
+      { type:"qcm", text:"Les pays féminins (qui finissent souvent en -e : France, Algérie, Espagne…) utilisent quelle préposition pour indiquer le lieu ou l'origine ?", options:["en","au","à","dans"], correct:"en", fw:"« au » s'utilise avec les pays masculins (au Maroc, au Japon, au Canada). Pour un pays féminin comme l'Algérie, c'est différent.", fc:"Oui ! Pays féminin → en. Pays masculin → au. Ville → à. Trois règles simples à retenir." },
+      { type:"question", text:"Essaie de placer la bonne préposition devant : Espagne / Canada / Tunisie / Portugal / Chine." },
+    ]
+  },
+  parler_de: { label:"Parler de",
+    steps:[
+      { type:"question", text:"Dans la phrase en rouge, le verbe « parler » est suivi d'un complément. En arabe, le verbe « تكلّم عن » (takallama ʿan) est-il suivi directement de son complément ou d'une préposition ?" },
+      { type:"qcm", text:"« Il parle ___ son voyage. » Le verbe parler, quand il introduit un sujet de conversation, est suivi de :", options:["de","sur","à","pour"], correct:"de", fw:"« parler sur » n'existe pas en français standard. Il y a une préposition fixe qui accompagne toujours « parler » + sujet de conversation. C'est une construction figée.", fc:"Oui ! Parler DE est une construction fixe : il parle de son voyage, de sa famille, de ses projets. C'est toujours « de »." },
+    ]
+  },
+  penser_a: { label:"Penser à",
+    steps:[
+      { type:"question", text:"La phrase en rouge utilise le verbe « penser ». Ce verbe change de préposition selon son sens. Selon toi, quelle différence y a-t-il entre « je pense à toi » et « que penses-tu de ce film » ?" },
+      { type:"qcm", text:"Pour « avoir quelqu'un en tête, ne pas l'oublier », le verbe penser est suivi de :", options:["à","de","sur","pour"], correct:"à", fw:"Attention : « penser de » existe mais exprime un avis, une opinion (Que penses-tu de ce livre ?). Pour l'idée d'avoir quelqu'un ou quelque chose dans ses pensées, c'est une autre préposition.", fc:"Parfait ! Penser À = avoir en tête. Je pense à toi, à mes parents, à l'examen. « Penser de » = donner son avis." },
+    ]
+  },
+  position: { label:"Prépositions spatiales",
+    steps:[
+      { type:"question", text:"La phrase en rouge décrit où est posé un vase par rapport à la table. Est-ce que le vase est à l'intérieur de la table, ou bien sur sa surface supérieure ?" },
+      { type:"qcm", text:"Le vase touche la surface du dessus de la table. Quelle préposition indique le contact avec une surface ?", options:["sur","dans","à","en"], correct:"sur", fw:"« dans » indique l'intérieur d'un espace fermé (dans la boîte, dans le tiroir). Ici le vase n'est pas à l'intérieur de la table, il est posé sur sa face supérieure.", fc:"Exactement ! « sur » = posé sur une surface. « dans » = à l'intérieur. Le vase sur la table, les clés dans le tiroir." },
+      { type:"question", text:"Essaie de compléter : Le chat est ___ le canapé. Le stylo est ___ le sac. L'affiche est ___ le mur." },
+    ]
+  },
+};
+
+// ═══════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════
+let studentName = '', studentClasse = '';
+let studentAnswers = {}, errors = [];
+let currentErrorIndex = 0, currentStep = 0;
+let sessionId = '';
+let mediationLog = []; // log de toutes les interactions de médiation
+let startTime = null;
+let phasesDone = { obs: false, ana: false, med: false };
+
+function genSessionId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+// ═══════════════════════════════════════════════════════
+// DÉMARRAGE
+// ═══════════════════════════════════════════════════════
+function demarrer() {
+  const nom = document.getElementById('input-nom').value.trim();
+  const classe = document.getElementById('input-classe').value.trim();
+  if (!nom) { showToast('Veuillez entrer votre nom.'); return; }
+  studentName = nom;
+  studentClasse = classe;
+  sessionId = genSessionId();
+  startTime = new Date().toISOString();
+
+  document.getElementById('header-student').textContent = nom + (classe ? ' — ' + classe : '');
+  document.getElementById('header-score').style.display = 'block';
+  document.getElementById('score-display').textContent = 'Phase 1';
+
+  document.getElementById('screen-accueil').classList.add('hidden');
+  document.getElementById('screen-main').classList.remove('hidden');
+  buildExercise();
+
+  // Envoyer début de session
+  sendData({ event: 'debut_session', nom: studentName, classe: studentClasse, heure: startTime });
+}
+
+// ═══════════════════════════════════════════════════════
+// EXERCICE
+// ═══════════════════════════════════════════════════════
+function buildExercise() {
+  const c = document.getElementById('exercise-container');
+  c.innerHTML = sentences.map((s, i) => {
+    const p = s.full.split('___');
+    return `<li class="exercise-item">
+      <span class="ex-num">${i+1}.</span>
+      <span>${p[0]}</span>
+      <input class="fill-blank" id="ans-${i}" placeholder="___" autocomplete="off" spellcheck="false">
+      <span>${p[1]}</span>
+    </li>`;
+  }).join('');
+}
+
+function submitObservation() {
+  errors = [];
+  const reponsesEleve = {};
+
+  sentences.forEach((s, i) => {
+    const inp = document.getElementById(`ans-${i}`);
+    const val = inp ? inp.value.trim().toLowerCase() : '';
+    studentAnswers[i] = val;
+    reponsesEleve['q'+(i+1)] = val;
+    if (val !== s.answer) {
+      inp.classList.add('wrong');
+      errors.push({ ...s, studentAnswer: val });
+    } else {
+      inp.classList.add('correct');
+    }
+  });
+
+  const score = Math.round(((sentences.length - errors.length) / sentences.length) * 100);
+  document.getElementById('score-display').textContent = `Score : ${score}%`;
+
+  // Afficher résultats
+  const res = document.getElementById('obs-results');
+  res.classList.remove('hidden');
+  const errDiv = document.getElementById('error-summary');
+
+  if (!errors.length) {
+    errDiv.innerHTML = '<p style="color:var(--green-text); font-size:15px;">Aucune erreur — excellent travail !</p>';
+  } else {
+    errDiv.innerHTML = `<p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">
+      ${errors.length} erreur(s) sur ${sentences.length} phrases :
+    </p>`
+    + errors.map(e => `<div style="margin-bottom:8px;">
+        <span class="error-phrase">${e.full.replace('___', e.studentAnswer ? '<u>'+e.studentAnswer+'</u>' : '∅')}</span>
+      </div>`).join('');
+  }
+
+  phasesDone.obs = true;
+  buildAnalysis();
+
+  // Envoyer données phase 1
+  sendData({
+    event: 'phase1_observation',
+    nom: studentName,
+    classe: studentClasse,
+    session: sessionId,
+    score_pct: score,
+    nb_erreurs: errors.length,
+    nb_correct: sentences.length - errors.length,
+    ...reponsesEleve,
+    erreurs_detail: errors.map(e => `"${e.full}" → écrit:"${e.studentAnswer||'∅'}" (attendu:"${e.answer}")`).join(' | ')
+  });
+}
+
+function resetExercise() {
+  sentences.forEach((_, i) => {
+    const inp = document.getElementById(`ans-${i}`);
+    if (inp) { inp.value = ''; inp.className = 'fill-blank'; }
+  });
+  document.getElementById('obs-results').classList.add('hidden');
+  errors = []; studentAnswers = {};
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYSE
+// ═══════════════════════════════════════════════════════
+function buildAnalysis() {
+  const byType = {};
+  errors.forEach(e => {
+    if (!byType[e.errorType]) byType[e.errorType] = [];
+    byType[e.errorType].push(e);
+  });
+
+  document.getElementById('analysis-content').innerHTML = !errors.length
+    ? '<p style="color:var(--green-text)">Aucune erreur à analyser.</p>'
+    : Object.entries(byType).map(([type, errs]) =>
+        `<div class="analysis-row">
+          <div style="flex:1">
+            <p style="font-size:14px; font-weight:500; margin-bottom:4px;">${type}</p>
+            ${errs.map(e => `<p style="font-size:13px; color:var(--text-secondary);">
+              ${e.full.replace('___','<em>___</em>')} — écrit : <span style="color:var(--red)">${e.studentAnswer||'∅'}</span>
+            </p>`).join('')}
+          </div>
+          <span class="tag-wrong">${errs.length} erreur(s)</span>
+        </div>`
+      ).join('');
+
+  const score = Math.round(((sentences.length - errors.length) / sentences.length) * 100);
+  const main = Object.entries(byType).sort((a,b)=>b[1].length-a[1].length)[0];
+
+  document.getElementById('learner-profile').innerHTML = `
+    <div class="metrics">
+      <div class="metric">
+        <p class="metric-label">Score</p>
+        <p class="metric-val" style="color:${score>=70?'var(--green)':'var(--red)'}">${score}%</p>
+      </div>
+      <div class="metric">
+        <p class="metric-label">Erreurs</p>
+        <p class="metric-val">${errors.length}/${sentences.length}</p>
+      </div>
+      <div class="metric" style="flex:2; text-align:left;">
+        <p class="metric-label">Lacune principale</p>
+        <p style="font-size:14px; font-weight:500; margin-top:4px;">${main ? main[0] : '—'}</p>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// MÉDIATION
+// ═══════════════════════════════════════════════════════
+function startMediation() {
+  currentErrorIndex = 0;
+  mediationLog = [];
+  loadMediationStep();
+}
+
+function loadMediationStep() {
+  const list = errors.length ? errors : sentences.map(s => ({...s, studentAnswer:'?'}));
+  const area = document.getElementById('mediation-area');
+  const pct = Math.round((currentErrorIndex / list.length) * 100);
+  document.getElementById('med-progress').style.width = pct + '%';
+
+  if (currentErrorIndex >= list.length) {
+    area.innerHTML = `<div class="card" style="text-align:center; padding:2rem;">
+      <p style="font-size:20px; font-weight:500; margin-bottom:8px;">Médiation terminée ✓</p>
+      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:16px;">
+        Vous avez travaillé toutes les lacunes identifiées.<br>
+        Vos données ont été enregistrées.
+      </p>
+      <p style="font-size:13px; color:var(--text-secondary);">Merci ${studentName} !</p>
+    </div>`;
+    document.getElementById('progress-label').textContent = 'Terminé';
+
+    // Envoyer données phase 3 complètes
+    sendData({
+      event: 'phase3_mediation_terminee',
+      nom: studentName,
+      classe: studentClasse,
+      session: sessionId,
+      nb_lacunes_travaillees: currentErrorIndex,
+      log_interactions: mediationLog.map(l =>
+        `[${l.lacune}] Q:${l.question_type} R:"${l.reponse_eleve}" Correct:${l.correct}`
+      ).join(' || ')
+    });
+    return;
+  }
+
+  const err = list[currentErrorIndex];
+  const dialog = mediationDialogs[err.context];
+  currentStep = 0;
+
+  document.getElementById('progress-label').innerHTML =
+    `Lacune ${currentErrorIndex+1} sur ${list.length} — <strong>${dialog ? dialog.label : err.errorType}</strong>`;
+
+  area.innerHTML = `<div class="card" id="med-card">
+    <p style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Phrase à corriger :</p>
+    <p class="error-phrase" style="font-size:15px; margin-bottom:16px;">
+      ${err.full.replace('___', err.studentAnswer && err.studentAnswer !== '?' ? '<u>'+err.studentAnswer+'</u>' : '___')}
+    </p>
+    <div class="chat-area" id="chat-area"></div>
+  </div>`;
+
+  if (dialog) appendAndRender(dialog.steps[0]);
+}
+
+function appendAndRender(step) {
+  const area = document.getElementById('chat-area');
+
+  // Bulle médiateur
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  bubble.textContent = step.text;
+  area.appendChild(bubble);
+
+  if (step.type === 'qcm') {
+    const wrap = document.createElement('div');
+    wrap.className = 'options-wrap';
+    step.options.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'option-btn';
+      b.textContent = o;
+      b.onclick = () => handleQCM(b, o, step, wrap);
+      wrap.appendChild(b);
+    });
+    area.appendChild(wrap);
+  } else {
+    const wrap = document.createElement('div');
+    const ta = document.createElement('textarea');
+    ta.className = 'student-input';
+    ta.placeholder = 'Écris ta réponse ici…';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.style.marginTop = '8px';
+    btn.textContent = 'Continuer →';
+    btn.onclick = () => {
+      const val = ta.value.trim();
+      if (!val) return;
+      addUserBubble(val);
+      logInteraction('question_ouverte', val, null);
+      wrap.remove();
+      currentStep++;
+      advance();
+    };
+    wrap.appendChild(ta);
+    wrap.appendChild(btn);
+    area.appendChild(wrap);
+  }
+  area.scrollTop = area.scrollHeight;
+}
+
+let qcmAttempts = 0;
+
+function handleQCM(btn, val, step, wrap) {
+  qcmAttempts++;
+  wrap.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+  if (val === step.correct) {
+    btn.classList.add('ok');
+    addBubble(step.fc, 'system');
+    logInteraction('qcm', val, true, qcmAttempts);
+    qcmAttempts = 0;
+    currentStep++;
+    setTimeout(advance, 700);
+  } else {
+    btn.classList.add('ko');
+    addBubble(step.fw);
+    logInteraction('qcm', val, false, qcmAttempts);
+    setTimeout(() => {
+      wrap.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('ok', 'ko');
+      });
+    }, 1400);
+  }
+}
+
+function advance() {
+  const list = errors.length ? errors : sentences.map(s => ({...s, studentAnswer:'?'}));
+  const dialog = mediationDialogs[list[currentErrorIndex].context];
+  if (!dialog || currentStep >= dialog.steps.length) {
+    addBubble("Très bien ! Tu as bien réfléchi à cette difficulté. Passons à la suivante.");
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.style.marginTop = '12px';
+    btn.textContent = 'Lacune suivante →';
+    btn.onclick = () => { currentErrorIndex++; loadMediationStep(); };
+    document.getElementById('chat-area').appendChild(btn);
+
+    // Envoyer données de cette lacune
+    sendData({
+      event: 'lacune_terminee',
+      nom: studentName,
+      classe: studentClasse,
+      session: sessionId,
+      lacune_index: currentErrorIndex + 1,
+      lacune_type: list[currentErrorIndex].errorType,
+      phrase: list[currentErrorIndex].full,
+      reponse_initiale: list[currentErrorIndex].studentAnswer || '∅'
+    });
+    return;
+  }
+  appendAndRender(dialog.steps[currentStep]);
+}
+
+function logInteraction(type, reponse, correct, attempts) {
+  const list = errors.length ? errors : sentences.map(s => ({...s, studentAnswer:'?'}));
+  mediationLog.push({
+    lacune: list[currentErrorIndex] ? list[currentErrorIndex].errorType : '?',
+    question_type: type,
+    reponse_eleve: reponse,
+    correct: correct,
+    tentatives: attempts || 1
+  });
+}
+
+function addBubble(text, cls) {
+  const area = document.getElementById('chat-area');
+  const d = document.createElement('div');
+  d.className = 'chat-bubble' + (cls ? ' '+cls : '');
+  d.textContent = text;
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+}
+
+function addUserBubble(text) {
+  const area = document.getElementById('chat-area');
+  const d = document.createElement('div');
+  d.className = 'chat-bubble user';
+  d.textContent = text;
+  area.appendChild(d);
+  area.scrollTop = area.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showPhase(p) {
+  ['observation','analyse','mediation'].forEach(x => {
+    document.getElementById('phase-'+x).classList.add('hidden');
+  });
+  ['obs','ana','med'].forEach(x => {
+    document.getElementById('btn-'+x).classList.remove('active');
+  });
+  document.getElementById('phase-'+p).classList.remove('hidden');
+  const map = { observation:'obs', analyse:'ana', mediation:'med' };
+  document.getElementById('btn-'+map[p]).classList.add('active');
+  if (p === 'mediation' && !phasesDone.med) {
+    phasesDone.med = true;
+    startMediation();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ENVOI GOOGLE SHEETS
+// ═══════════════════════════════════════════════════════
+function sendData(payload) {
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'COLLEZ_ICI_L_URL_DE_VOTRE_APPS_SCRIPT') {
+    console.log('[Mode local — données non envoyées]', payload);
+    return;
+  }
+  payload.etude = NOM_ETUDE;
+  payload.timestamp = new Date().toISOString();
+
+  // Utiliser fetch avec no-cors pour éviter les erreurs CORS
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(err => console.warn('Envoi échoué (réseau) :', err));
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILITAIRES
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
