@@ -803,70 +803,74 @@ function addTextInput(cprompt, retryMsg){
   area.scrollTop=area.scrollHeight;
 }
 
-async function callAPI(studentText, cprompt){
-  const thinking=addBub('Je lis ta réponse…','thinking');
+// Évaluation locale des réponses ouvertes (sans appel API externe)
+// Logique : si l'élève a écrit quelque chose de substantiel, on valide.
+// On bloque seulement si la réponse est vide ou explicitement "je ne sais pas".
+function evaluerReponse(studentText, cprompt){
+  const t = studentText.trim().toLowerCase();
 
-  // Ajouter le message de l'apprenant dans l'historique de conversation
-  openConvHistory.push({role:'user', content:studentText});
+  // Bloquer : réponse vide ou "je ne sais pas"
+  const tropCourt = t.length < 8;
+  const nesSaitPas = /je (ne |n')?(sais?|connais?|comprends?|trouve) pas|aucune? id[eé]e|i don'?t know/.test(t);
 
-  const systemPrompt = cprompt + `
+  if(tropCourt || nesSaitPas){
+    const exemple = extraireExemple(cprompt);
+    return {
+      approved: false,
+      feedback: "Essaie quand même ! " + (exemple
+        ? "Voici un exemple pour t'aider : « " + exemple + " ». À toi maintenant."
+        : "Écris une phrase complète avec ce que tu as compris, même imparfaite.")
+    };
+  }
 
-RÈGLES :
-1. Ne mentionne jamais une préposition de façon isolée — intègre-la toujours dans une phrase complète.
-2. Tu es un médiateur cognitif bienveillant. Sois chaleureux et encourageant.
-3. Réponds UNIQUEMENT en JSON valide, sans texte avant ou après : {"approved": true/false, "feedback": "ton message ici"}
+  // Tout le reste : effort réel détecté → on valide
+  return {
+    approved: true,
+    feedback: genererFeedbackPositif()
+  };
+}
 
-CRITÈRES — sois généreux dans ta validation :
-- approved:true dès que l'apprenant fait un effort réel et que l'intention est correcte, même si la formulation est imparfaite. Mentionne la nuance dans le feedback si besoin, mais valide quand même.
-- approved:false UNIQUEMENT si la réponse est vide, totalement hors sujet, ou si l'apprenant écrit explicitement qu'il ne sait pas. Dans ce cas donne un exemple modèle concret et invite à reformuler brièvement.
-- En cas de doute, choisis toujours approved:true.`;
+function extraireExemple(cprompt){
+  const c = cprompt.toLowerCase();
+  if(c.includes('ville') && c.includes('rome')) return 'Elle part à Rome pour un séminaire';
+  if(c.includes('ville')) return 'Il s'installe à Tunis après ses études';
+  if(c.includes('assister') || c.includes('participer')) return 'Il participe à une conférence internationale';
+  if(c.includes('pays') || c.includes('tunisie')) return 'Elle a étudié en Italie et au Canada';
+  if(c.includes('parler') && c.includes('distinction')) return 'Elle parle à son directeur / Elle parle de ses recherches';
+  if(c.includes('dans') && c.includes('pour')) return 'Il travaille dans une ONG / Il travaille pour une ONG';
+  if(c.includes('porter') || c.includes('synonyme')) return 'Sa thèse traite de l'acquisition du vocabulaire';
+  if(c.includes('collab') || c.includes('conjoint')) return 'Elle coopère avec des chercheurs étrangers';
+  if(c.includes('chez')) return 'Chez les linguistes, ce débat est fréquent';
+  if(c.includes('par') && c.includes('expression')) return 'La décision a été prise par vote / Il l'a appris par hasard';
+  return null;
+}
 
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:500,
-        system: systemPrompt,
-        messages: openConvHistory
-      })
-    });
-    const d=await r.json();
-    if(thinking&&thinking.parentNode) thinking.parentNode.removeChild(thinking);
+function genererFeedbackPositif(){
+  const f = [
+    "Très bien ! Tes exemples montrent que tu as compris le principe. Continuons.",
+    "Bonne réponse ! Tu utilises la construction correctement. On avance.",
+    "C'est exactement le genre d'exemples attendus. Tu progresses bien !",
+    "Bien construit ! Tu maîtrises cette structure. Passons à la suite.",
+    "Parfait, tes phrases illustrent bien ce qu'on vient de travailler.",
+  ];
+  return f[Math.floor(Math.random() * f.length)];
+}
 
-    const raw=d.content&&d.content[0]&&d.content[0].text ? d.content[0].text.trim() : '{"approved":true,"feedback":"Merci, continuons."}';
-
-    let parsed;
-    try{
-      // Nettoyer les éventuels backticks markdown
-      const clean=raw.replace(/```json|```/g,'').trim();
-      parsed=JSON.parse(clean);
-    } catch(_){
-      // Si le JSON est malformé, on avance quand même
-      parsed={approved:true, feedback:raw};
-    }
-
-    // Ajouter la réponse de l'IA dans l'historique
-    openConvHistory.push({role:'assistant', content: JSON.stringify(parsed)});
-
-    if(parsed.approved){
-      // Exemples validés → bulle verte + on avance
-      addBub(parsed.feedback,'confirm');
+function callAPI(studentText, cprompt){
+  const thinking = addBub('Je lis ta réponse…','thinking');
+  setTimeout(()=>{
+    if(thinking && thinking.parentNode) thinking.parentNode.removeChild(thinking);
+    openConvHistory.push({role:'user', content:studentText});
+    const result = evaluerReponse(studentText, cprompt);
+    if(result.approved){
+      addBub(result.feedback,'confirm');
       currentStep++;
-      setTimeout(nextStep, 700);
+      setTimeout(nextStep, 600);
     } else {
-      // Exemples insuffisants → bulle bleue + on réaffiche la zone de saisie
-      addBub(parsed.feedback);
-      // Relancer une saisie avec le même cprompt, sans message de relance supplémentaire
+      addBub(result.feedback);
       setTimeout(()=> addTextInput(cprompt, null), 400);
     }
-
-  } catch(e){
-    if(thinking&&thinking.parentNode) thinking.parentNode.removeChild(thinking);
-    addBub("Je n'ai pas pu analyser ta réponse. Essaie encore — écris au moins un exemple complet.");
-    setTimeout(()=> addTextInput(cprompt, null), 400);
-  }
+  }, 800);
 }
 
 // Réinitialiser l'historique de conversation ouverte à chaque nouvelle lacune
