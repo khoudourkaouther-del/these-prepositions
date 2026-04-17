@@ -5,277 +5,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Médiateur Cognitif — Les Prépositions</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --blue: #185FA5;
-    --blue-dark: #0C447C;
-    --blue-light: #E6F1FB;
-    --blue-text: #042C53;
-    --green: #1D9E75;
-    --green-light: #EAF3DE;
-    --green-text: #3B6D11;
-    --red: #E24B4A;
-    --red-light: #FCEBEB;
-    --red-text: #A32D2D;
-    --gray-bg: #F5F5F3;
-    --gray-card: #ffffff;
-    --gray-border: rgba(0,0,0,0.12);
-    --gray-border-strong: rgba(0,0,0,0.22);
-    --text-primary: #1a1a1a;
-    --text-secondary: #666;
-    --text-hint: #999;
-    --radius: 10px;
-    --radius-lg: 14px;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--gray-bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-  }
-
-  .header {
-    background: var(--blue);
-    color: #fff;
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  .header h1 { font-size: 16px; font-weight: 500; }
-  .header p { font-size: 12px; opacity: 0.75; }
-
-  .container { max-width: 780px; margin: 0 auto; padding: 1.5rem 1rem; }
-
-  /* Écran d'accueil */
-  #screen-accueil { text-align: center; padding: 2rem 1rem; }
-  #screen-accueil h2 { font-size: 22px; font-weight: 500; margin-bottom: 8px; }
-  #screen-accueil p { color: var(--text-secondary); margin-bottom: 24px; font-size: 15px; line-height: 1.6; }
-  .welcome-card {
-    background: var(--gray-card);
-    border: 0.5px solid var(--gray-border);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: left;
-  }
-  .welcome-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 10px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-  .welcome-card ul { padding-left: 1.2rem; color: var(--text-secondary); font-size: 14px; line-height: 2; }
-
-  /* Phase bar */
-  .phase-bar {
-    display: flex;
-    background: var(--gray-card);
-    border: 0.5px solid var(--gray-border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-  }
-  .phase-btn {
-    flex: 1; padding: 10px 8px;
-    border: none; background: transparent;
-    font-size: 13px; cursor: pointer;
-    color: var(--text-secondary);
-    border-right: 0.5px solid var(--gray-border);
-    transition: background 0.15s;
-  }
-  .phase-btn:last-child { border-right: none; }
-  .phase-btn.active { background: var(--blue); color: #fff; font-weight: 500; }
-  .phase-btn.done { background: var(--green-light); color: var(--green-text); }
-
-  /* Cards */
-  .card {
-    background: var(--gray-card);
-    border: 0.5px solid var(--gray-border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .section-label {
-    font-size: 11px; font-weight: 500; color: var(--text-secondary);
-    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px;
-  }
-
-  /* Exercise */
-  .exercise-list { list-style: none; }
-  .exercise-item {
-    display: flex; align-items: center; gap: 4px;
-    padding: 10px 0;
-    border-bottom: 0.5px solid var(--gray-border);
-    font-size: 15px; line-height: 1.5; flex-wrap: wrap;
-  }
-  .exercise-item:last-child { border-bottom: none; }
-  .ex-num {
-    font-size: 12px; color: var(--text-hint);
-    min-width: 20px;
-  }
-
-  input.fill-blank {
-    border: none;
-    border-bottom: 2px solid var(--blue);
-    background: transparent;
-    color: var(--text-primary);
-    font-size: 15px;
-    width: 72px;
-    text-align: center;
-    outline: none;
-    padding: 2px 4px;
-    font-family: inherit;
-    transition: border-color 0.2s;
-  }
-  input.fill-blank:focus { border-bottom-color: var(--blue-dark); }
-  input.fill-blank.wrong { border-bottom-color: var(--red); color: var(--red); }
-  input.fill-blank.correct { border-bottom-color: var(--green); color: var(--green); }
-
-  /* Buttons */
-  .btn {
-    padding: 10px 22px;
-    border-radius: var(--radius);
-    font-size: 14px;
-    cursor: pointer;
-    font-family: inherit;
-    border: 0.5px solid var(--gray-border-strong);
-    background: var(--gray-bg);
-    color: var(--text-primary);
-  }
-  .btn-primary {
-    background: var(--blue);
-    color: #fff;
-    border-color: var(--blue);
-  }
-  .btn-primary:hover { background: var(--blue-dark); }
-  .btn-danger { background: var(--red-light); color: var(--red-text); border-color: var(--red); }
-
-  /* Tags */
-  .tag-wrong {
-    display: inline-block;
-    background: var(--red-light); color: var(--red-text);
-    border-radius: 6px; font-size: 12px;
-    padding: 3px 9px; font-weight: 500;
-  }
-  .tag-correct {
-    display: inline-block;
-    background: var(--green-light); color: var(--green-text);
-    border-radius: 6px; font-size: 12px;
-    padding: 3px 9px; font-weight: 500;
-  }
-
-  /* Error phrase */
-  .error-phrase {
-    color: var(--red-text);
-    background: var(--red-light);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-weight: 500;
-  }
-
-  /* Progress bar */
-  .progress-bg {
-    background: var(--gray-bg);
-    border-radius: 4px; height: 6px; margin: 8px 0;
-  }
-  .progress-fill {
-    height: 6px; border-radius: 4px;
-    background: var(--green);
-    transition: width 0.4s ease;
-  }
-
-  /* Chat */
-  .chat-area { display: flex; flex-direction: column; gap: 8px; }
-  .chat-bubble {
-    background: var(--blue-light); color: var(--blue-text);
-    border-radius: var(--radius-lg);
-    border-top-left-radius: 4px;
-    padding: 12px 16px;
-    font-size: 15px; line-height: 1.65;
-    max-width: 90%;
-  }
-  .chat-bubble.user {
-    background: #F0F0EE;
-    color: var(--text-primary);
-    margin-left: auto;
-    border-top-right-radius: 4px;
-    border-top-left-radius: var(--radius-lg);
-    font-style: italic;
-  }
-  .chat-bubble.system {
-    background: var(--green-light); color: var(--green-text);
-    border-radius: var(--radius);
-    font-size: 14px;
-  }
-
-  /* QCM options */
-  .options-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-  .option-btn {
-    text-align: left; padding: 10px 14px;
-    border: 0.5px solid var(--gray-border-strong);
-    border-radius: var(--radius);
-    background: var(--gray-card);
-    color: var(--text-primary);
-    font-size: 14px; cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s;
-  }
-  .option-btn:hover:not(:disabled) { background: var(--gray-bg); }
-  .option-btn.ok { background: var(--green-light); border-color: #97C459; color: var(--green-text); }
-  .option-btn.ko { background: var(--red-light); border-color: #F09595; color: var(--red-text); }
-
-  /* Text answer */
-  textarea.student-input {
-    width: 100%;
-    border: 0.5px solid var(--gray-border-strong);
-    border-radius: var(--radius);
-    background: var(--gray-card);
-    color: var(--text-primary);
-    font-family: inherit; font-size: 14px;
-    padding: 10px 12px;
-    resize: vertical; min-height: 80px;
-    outline: none; margin-top: 8px;
-  }
-  textarea.student-input:focus { border-color: var(--blue); }
-
-  /* Analysis */
-  .analysis-row {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 10px 0;
-    border-bottom: 0.5px solid var(--gray-border);
-  }
-  .analysis-row:last-child { border-bottom: none; }
-
-  /* Metric cards */
-  .metrics { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem; }
-  .metric {
-    flex: 1; min-width: 100px;
-    background: var(--gray-bg);
-    border-radius: var(--radius);
-    padding: 12px;
-    text-align: center;
-  }
-  .metric-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .metric-val { font-size: 26px; font-weight: 500; }
-
-  /* Toast */
-  .toast {
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    background: #1a1a1a; color: #fff;
-    padding: 10px 20px; border-radius: var(--radius);
-    font-size: 13px; z-index: 100;
-    opacity: 0; transition: opacity 0.3s;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; }
-
-  .hidden { display: none !important; }
-
-  @media (max-width: 500px) {
-    .phase-btn { font-size: 11px; padding: 8px 4px; }
-    .exercise-item { font-size: 14px; }
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:#185FA5; --blue-dark:#0C447C; --blue-light:#E6F1FB; --blue-text:#042C53;
+  --green:#1D9E75; --green-light:#EAF3DE; --green-text:#3B6D11;
+  --red:#E24B4A; --red-light:#FCEBEB; --red-text:#A32D2D;
+  --gray-bg:#F5F5F3; --gray-card:#ffffff;
+  --gray-border:rgba(0,0,0,0.12); --gray-border-strong:rgba(0,0,0,0.22);
+  --text-primary:#1a1a1a; --text-secondary:#666; --text-hint:#999;
+  --radius:10px; --radius-lg:14px;
+}
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--gray-bg); color:var(--text-primary); min-height:100vh; }
+.header { background:var(--blue); color:#fff; padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10; }
+.header h1 { font-size:16px; font-weight:500; }
+.header p { font-size:12px; opacity:0.75; }
+.container { max-width:800px; margin:0 auto; padding:1.5rem 1rem; }
+.welcome-card { background:var(--gray-card); border:0.5px solid var(--gray-border); border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1rem; }
+.welcome-card h3 { font-size:11px; font-weight:500; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:10px; }
+.welcome-card ul { padding-left:1.2rem; color:var(--text-secondary); font-size:14px; line-height:2.1; }
+.phase-bar { display:flex; background:var(--gray-card); border:0.5px solid var(--gray-border); border-radius:var(--radius); overflow:hidden; margin-bottom:1.5rem; }
+.phase-btn { flex:1; padding:10px 6px; border:none; background:transparent; font-size:13px; cursor:pointer; color:var(--text-secondary); border-right:0.5px solid var(--gray-border); font-family:inherit; }
+.phase-btn:last-child { border-right:none; }
+.phase-btn.active { background:var(--blue); color:#fff; font-weight:500; }
+.card { background:var(--gray-card); border:0.5px solid var(--gray-border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1rem; }
+.section-label { font-size:11px; font-weight:500; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:12px; }
+.exercise-list { list-style:none; }
+.exercise-item { padding:14px 0; border-bottom:0.5px solid var(--gray-border); font-size:15px; line-height:2.8; }
+.exercise-item:last-child { border-bottom:none; }
+.ex-num { font-size:12px; color:var(--text-hint); margin-right:6px; }
+input.fill-blank { border:none; border-bottom:2px solid var(--blue); background:transparent; color:var(--text-primary); font-size:15px; width:68px; text-align:center; outline:none; padding:1px 3px; font-family:inherit; margin:0 3px; vertical-align:baseline; transition:border-color 0.2s; }
+input.fill-blank:focus { border-bottom-color:var(--blue-dark); }
+input.fill-blank.wrong { border-bottom-color:var(--red); color:var(--red-text); }
+input.fill-blank.correct { border-bottom-color:var(--green); color:var(--green-text); }
+.btn { padding:10px 20px; border-radius:var(--radius); font-size:14px; cursor:pointer; font-family:inherit; border:0.5px solid var(--gray-border-strong); background:var(--gray-bg); color:var(--text-primary); }
+.btn-primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+.btn-primary:hover { background:var(--blue-dark); }
+.tag-wrong { display:inline-block; background:var(--red-light); color:var(--red-text); border-radius:6px; font-size:12px; padding:3px 9px; font-weight:500; }
+.error-inline { color:var(--red-text); background:var(--red-light); border-radius:4px; padding:1px 6px; font-weight:500; text-decoration:underline; }
+.correct-inline { color:var(--green-text); font-weight:500; }
+.neutral-inline { color:var(--text-secondary); }
+.progress-bg { background:var(--gray-bg); border-radius:4px; height:6px; margin:8px 0; }
+.progress-fill { height:6px; border-radius:4px; background:var(--green); transition:width 0.4s ease; }
+.chat-area { display:flex; flex-direction:column; gap:8px; }
+.chat-bubble { background:var(--blue-light); color:var(--blue-text); border-radius:var(--radius-lg); border-top-left-radius:4px; padding:12px 16px; font-size:15px; line-height:1.7; max-width:92%; }
+.chat-bubble.user { background:#EFEFED; color:var(--text-primary); margin-left:auto; border-top-right-radius:4px; border-top-left-radius:var(--radius-lg); font-style:italic; }
+.chat-bubble.confirm { background:var(--green-light); color:var(--green-text); border-radius:var(--radius); font-size:14px; }
+.chat-bubble.thinking { background:var(--gray-bg); color:var(--text-secondary); font-style:italic; font-size:14px; border-radius:var(--radius); animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.options-wrap { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.option-btn { text-align:left; padding:10px 14px; border:0.5px solid var(--gray-border-strong); border-radius:var(--radius); background:var(--gray-card); color:var(--text-primary); font-size:14px; cursor:pointer; font-family:inherit; }
+.option-btn:hover:not(:disabled) { background:var(--gray-bg); }
+.option-btn.ok { background:var(--green-light); border-color:#97C459; color:var(--green-text); }
+.option-btn.ko { background:var(--red-light); border-color:#F09595; color:var(--red-text); }
+textarea.student-input { width:100%; border:0.5px solid var(--gray-border-strong); border-radius:var(--radius); background:var(--gray-card); color:var(--text-primary); font-family:inherit; font-size:14px; padding:10px 12px; resize:vertical; min-height:80px; outline:none; margin-top:8px; }
+textarea.student-input:focus { border-color:var(--blue); }
+.analysis-row { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:0.5px solid var(--gray-border); }
+.analysis-row:last-child { border-bottom:none; }
+.metrics { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem; }
+.metric { flex:1; min-width:100px; background:var(--gray-bg); border-radius:var(--radius); padding:12px; text-align:center; }
+.metric-label { font-size:11px; color:var(--text-secondary); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em; }
+.metric-val { font-size:26px; font-weight:500; }
+input.ident-input { width:100%; padding:10px 12px; border:0.5px solid var(--gray-border-strong); border-radius:var(--radius); font-size:15px; font-family:inherit; outline:none; background:var(--gray-card); color:var(--text-primary); }
+input.ident-input:focus { border-color:var(--blue); }
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1a1a1a; color:#fff; padding:10px 20px; border-radius:var(--radius); font-size:13px; z-index:100; opacity:0; transition:opacity 0.3s; pointer-events:none; }
+.toast.show { opacity:1; }
+.hidden { display:none !important; }
+@media(max-width:500px){ .phase-btn{font-size:11px;padding:8px 3px;} input.fill-blank{width:55px;font-size:14px;} .exercise-item{font-size:14px;line-height:2.4;} }
 </style>
 </head>
 <body>
@@ -285,355 +80,564 @@
     <h1>Médiateur Cognitif — Les Prépositions</h1>
     <p id="header-student">Entrez votre nom pour commencer</p>
   </div>
-  <div id="header-score" style="text-align:right; display:none;">
-    <p style="font-size:13px; opacity:0.9;" id="score-display">—</p>
+  <div id="header-score" style="display:none;text-align:right;">
+    <p style="font-size:13px;opacity:0.9;" id="score-display">—</p>
   </div>
 </div>
 
 <div class="container">
-
-  <!-- ═══ ÉCRAN ACCUEIL ═══ -->
   <div id="screen-accueil">
-    <div class="welcome-card">
+    <div class="welcome-card" style="margin-top:0.5rem;">
       <h3>Identification</h3>
-      <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
         <div>
-          <label style="font-size:13px; color:var(--text-secondary); display:block; margin-bottom:4px;">Nom et prénom</label>
-          <input type="text" id="input-nom" placeholder="ex : Amina Bouzidi"
-            style="width:100%; padding:10px 12px; border:0.5px solid var(--gray-border-strong);
-            border-radius:var(--radius); font-size:15px; font-family:inherit; outline:none;">
+          <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Nom et prénom</label>
+          <input type="text" id="input-nom" class="ident-input" placeholder="ex : Amina Bouzidi">
         </div>
         <div>
-          <label style="font-size:13px; color:var(--text-secondary); display:block; margin-bottom:4px;">Classe / Groupe</label>
-          <input type="text" id="input-classe" placeholder="ex : 3AM groupe 2"
-            style="width:100%; padding:10px 12px; border:0.5px solid var(--gray-border-strong);
-            border-radius:var(--radius); font-size:15px; font-family:inherit; outline:none;">
+          <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Classe / Groupe</label>
+          <input type="text" id="input-classe" class="ident-input" placeholder="ex : M1 FLE groupe A">
         </div>
       </div>
     </div>
-
     <div class="welcome-card">
       <h3>Déroulement de l'activité</h3>
       <ul>
-        <li><strong>Phase 1</strong> — Exercice à trous : complétez les phrases avec la bonne préposition</li>
-        <li><strong>Phase 2</strong> — Vos erreurs seront analysées automatiquement</li>
-        <li><strong>Phase 3</strong> — Le médiateur vous guide par des questions pour comprendre vos erreurs</li>
+        <li><strong>Phase 1</strong> — Exercice à trous : complétez les phrases avec les prépositions manquantes</li>
+        <li><strong>Phase 2</strong> — Vos erreurs sont analysées et classifiées automatiquement</li>
+        <li><strong>Phase 3</strong> — Le médiateur vous guide par des questions pour surmonter vos difficultés</li>
       </ul>
     </div>
-
-    <button class="btn btn-primary" onclick="demarrer()" style="width:100%; padding:13px; font-size:15px;">
-      Commencer l'activité →
-    </button>
+    <button class="btn btn-primary" onclick="demarrer()" style="width:100%;padding:13px;font-size:15px;">Commencer l'activité →</button>
   </div>
 
-  <!-- ═══ ÉCRAN PRINCIPAL ═══ -->
   <div id="screen-main" class="hidden">
-
     <div class="phase-bar">
       <button class="phase-btn active" id="btn-obs" onclick="showPhase('observation')">① Observation</button>
       <button class="phase-btn" id="btn-ana" onclick="showPhase('analyse')">② Analyse</button>
       <button class="phase-btn" id="btn-med" onclick="showPhase('mediation')">③ Médiation</button>
     </div>
 
-    <!-- ── PHASE 1 ── -->
     <div id="phase-observation">
       <div class="card">
-        <p class="section-label">Exercice à trous — Complétez avec la bonne préposition</p>
-        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
-          Choisissez parmi : <strong>à, de, en, dans, sur, pour, avec, chez, par, vers</strong>
-        </p>
+        <p class="section-label">Exercice à trous — Complétez chaque blanc avec la préposition qui convient</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Banque de prépositions : <strong>à, de, en, dans, sur, pour, avec, par, chez, vers, entre</strong></p>
         <ul class="exercise-list" id="exercise-container"></ul>
-        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
           <button class="btn btn-primary" onclick="submitObservation()">Soumettre les réponses</button>
           <button class="btn" onclick="resetExercise()">Réinitialiser</button>
         </div>
       </div>
-
       <div id="obs-results" class="hidden">
         <div class="card">
           <p class="section-label">Résultats — Vos réponses</p>
           <div id="error-summary"></div>
-          <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+          <div style="margin-top:14px;">
             <button class="btn btn-primary" onclick="showPhase('analyse')">Voir l'analyse →</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── PHASE 2 ── -->
     <div id="phase-analyse" class="hidden">
       <div class="card">
-        <p class="section-label">Analyse des erreurs</p>
+        <p class="section-label">Analyse des erreurs — Classification didactique</p>
         <div id="analysis-content"></div>
       </div>
       <div class="card">
-        <p class="section-label">Votre profil</p>
+        <p class="section-label">Profil de l'apprenant</p>
         <div id="learner-profile"></div>
         <div style="margin-top:14px;">
-          <button class="btn btn-primary" onclick="showPhase('mediation')">Lancer la médiation →</button>
+          <button class="btn btn-primary" onclick="showPhase('mediation')">Lancer la médiation cognitive →</button>
         </div>
       </div>
     </div>
 
-    <!-- ── PHASE 3 ── -->
     <div id="phase-mediation" class="hidden">
       <div class="card">
         <p class="section-label">Médiation cognitive — Guidage par questionnement</p>
-        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:8px;">
-          Le médiateur ne donne pas la réponse directement. Il vous guide par des questions progressives.
-        </p>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Le médiateur ne donne aucune réponse directement. Il vous aide à raisonner par vous-même.</p>
         <div class="progress-bg"><div class="progress-fill" id="med-progress" style="width:0%"></div></div>
-        <p style="font-size:12px; color:var(--text-secondary);" id="progress-label">Lacune 1</p>
+        <p style="font-size:12px;color:var(--text-secondary);" id="progress-label">—</p>
       </div>
       <div id="mediation-area"></div>
     </div>
-
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════════════════════════════
-     CONFIGURATION — À MODIFIER AVANT DÉPLOIEMENT
-     ═══════════════════════════════════════════════════════ -->
 <script>
-/*
-  ┌─────────────────────────────────────────────────────────────────┐
-  │  ÉTAPE 1 — Créez votre Google Apps Script                       │
-  │                                                                 │
-  │  1. Allez sur script.google.com                                 │
-  │  2. Créez un nouveau projet                                     │
-  │  3. Collez le code Apps Script fourni dans le fichier           │
-  │     "apps_script.gs" livré avec ce HTML                        │
-  │  4. Cliquez "Déployer" → "Nouveau déploiement"                 │
-  │     → Type : Application Web                                    │
-  │     → Accès : Tout le monde                                     │
-  │  5. Copiez l'URL générée et collez-la ci-dessous               │
-  └─────────────────────────────────────────────────────────────────┘
-*/
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyg4ou2LuP76P_7c1Vey9ah_VNBTJ7M7bEjgd1ENNrR9z2VzrtlJrxH35eiIkUS3dUTLA/exec";
-// Exemple : "https://script.google.com/macros/s/AKfy.../exec"
-
-const NOM_ETUDE = "Prépositions — Mémoire 2025";
+const GOOGLE_SCRIPT_URL = "COLLEZ_ICI_L_URL_DE_VOTRE_APPS_SCRIPT";
+const NOM_ETUDE = "Prépositions FLE — Mémoire 2025";
 </script>
 
 <script>
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // DONNÉES
-// ═══════════════════════════════════════════════════════
-
+// categoryLabel : étiquette SANS préposition
+// ═══════════════════════════════════════════
 const sentences = [
-  { id:0, full:"Je vais ___ Paris demain.", answer:"à", context:"destination_ville", options:["à","en","dans","vers"], errorType:"Destination : ville" },
-  { id:1, full:"Elle habite ___ Lyon depuis deux ans.", answer:"à", context:"habiter_ville", options:["à","en","dans","chez"], errorType:"Destination : ville" },
-  { id:2, full:"Il voyage ___ avion chaque mois.", answer:"en", context:"moyen_transport", options:["en","par","avec","à"], errorType:"Moyen de transport" },
-  { id:3, full:"Ce livre est ___ mon professeur.", answer:"de", context:"appartenance", options:["de","à","par","pour"], errorType:"Appartenance (de)" },
-  { id:4, full:"Nous sommes nés ___ Algérie.", answer:"en", context:"pays_fem", options:["en","au","à","dans"], errorType:"Pays féminins (en)" },
-  { id:5, full:"Il parle ___ son voyage.", answer:"de", context:"parler_de", options:["de","sur","à","pour"], errorType:"Verbe + préposition (parler de)" },
-  { id:6, full:"Je pense ___ toi souvent.", answer:"à", context:"penser_a", options:["à","de","sur","pour"], errorType:"Verbe + préposition (penser à)" },
-  { id:7, full:"Elle met le vase ___ la table.", answer:"sur", context:"position", options:["sur","dans","à","en"], errorType:"Prépositions spatiales" },
+  { id:1, parts:["Elle part "," Paris pour assister "," un colloque international."],
+    blanks:[
+      { id:"1a", answer:"à",    answer_lc:"à",    context:"dest_ville_1",   options:["à","en","pour","vers"],    categoryLabel:"Destination : ville" },
+      { id:"1b", answer:"à",    answer_lc:"à",    context:"assister_a",     options:["à","de","sur","pour"],     categoryLabel:"Verbe + préposition" }
+    ]
+  },
+  { id:2, parts:["Il a vécu "," Espagne pendant trois ans avant de s'installer "," Alger."],
+    blanks:[
+      { id:"2a", answer:"en",   answer_lc:"en",   context:"pays_fem",       options:["en","à","au","dans"],     categoryLabel:"Pays féminins" },
+      { id:"2b", answer:"à",    answer_lc:"à",    context:"dest_ville_2",   options:["à","en","dans","pour"],   categoryLabel:"Destination : ville" }
+    ]
+  },
+  { id:3, parts:["Elle parle souvent "," ses recherches avec ses collègues."],
+    blanks:[
+      { id:"3a", answer:"de",   answer_lc:"de",   context:"parler_de",      options:["de","sur","à","pour"],    categoryLabel:"Verbe + préposition" }
+    ]
+  },
+  { id:4, parts:["Les étudiants travaillent "," la bibliothèque universitaire jusqu'à tard le soir."],
+    blanks:[
+      { id:"4a", answer:"dans", answer_lc:"dans", context:"lieu_ferme",     options:["dans","à","en","sur"],    categoryLabel:"Lieu fermé" }
+    ]
+  },
+  { id:5, parts:["Son mémoire porte "," l'impact des réseaux sociaux "," le discours politique."],
+    blanks:[
+      { id:"5a", answer:"sur",  answer_lc:"sur",  context:"porter_sur",     options:["sur","de","à","pour"],    categoryLabel:"Verbe + préposition" },
+      { id:"5b", answer:"sur",  answer_lc:"sur",  context:"impact_sur",     options:["sur","dans","en","de"],   categoryLabel:"Influence / impact" }
+    ]
+  },
+  { id:6, parts:["Elle a postulé "," un poste de chercheuse "," une ONG internationale."],
+    blanks:[
+      { id:"6a", answer:"pour", answer_lc:"pour", context:"postuler_pour",  options:["pour","à","de","en"],     categoryLabel:"Verbe + préposition" },
+      { id:"6b", answer:"dans", answer_lc:"dans", context:"lieu_orga",      options:["dans","à","en","de"],     categoryLabel:"Appartenance à une structure" }
+    ]
+  },
+  { id:7, parts:["Il collabore régulièrement "," des spécialistes "," le domaine de la linguistique."],
+    blanks:[
+      { id:"7a", answer:"avec", answer_lc:"avec", context:"collab_avec",    options:["avec","de","à","pour"],   categoryLabel:"Verbe + préposition" },
+      { id:"7b", answer:"dans", answer_lc:"dans", context:"domaine_dans",   options:["dans","de","en","sur"],   categoryLabel:"Domaine / champ" }
+    ]
+  },
+  { id:8, parts:["Il se dirige "," une carrière dans l'enseignement supérieur."],
+    blanks:[
+      { id:"8a", answer:"vers", answer_lc:"vers", context:"diriger_vers",   options:["vers","à","pour","en"],   categoryLabel:"Direction" }
+    ]
+  },
+  { id:9, parts:[""," nous, il est courant de débattre "," sujets philosophiques en famille."],
+    blanks:[
+      { id:"9a", answer:"Chez", answer_lc:"chez", context:"chez_nous",      options:["Chez","Pour","Entre","En"], categoryLabel:"Expression idiomatique" },
+      { id:"9b", answer:"de",   answer_lc:"de",   context:"debattre_de",    options:["de","sur","à","pour"],    categoryLabel:"Verbe + préposition" }
+    ]
+  },
+  { id:10, parts:["La décision a été prise "," consensus "," les membres du jury."],
+    blanks:[
+      { id:"10a", answer:"par",   answer_lc:"par",   context:"par_consensus", options:["par","en","avec","de"],   categoryLabel:"Expression figée" },
+      { id:"10b", answer:"entre", answer_lc:"entre", context:"entre_membres", options:["entre","avec","par","de"],categoryLabel:"Relation réciproque" }
+    ]
+  }
 ];
 
-const mediationDialogs = {
-  destination_ville: { label:"Destination : ville",
+// ═══════════════════════════════════════════
+// DIALOGUES DE MÉDIATION
+// Règles strictes :
+//  - aucune préposition citée isolément dans fw/fc
+//  - les exemples dans fc sont toujours complets (pas de ___)
+//  - open_corrected → correction via API Anthropic
+//  - dest_ville_1 et dest_ville_2 ont des séquences distinctes
+// ═══════════════════════════════════════════
+const dialogs = {
+
+  dest_ville_1: { label:"Destination : ville",
     steps:[
-      { type:"question", text:"Regarde la phrase en rouge. Tu as écrit une préposition pour indiquer qu'on va dans une ville. En arabe, quand tu dis « أنا رايح لـ الجزائر »  — y a-t-il une petite marque de direction ? Est-ce que le français fait pareil ?" },
-      { type:"qcm", text:"En français, pour indiquer qu'on va dans une ville (Paris, Lyon, Oran…), quelle préposition utilise-t-on ?", options:["à","en","dans","vers"], correct:"à", fw:"Pas tout à fait. « en » s'utilise avec les pays féminins, pas les villes. « dans » désigne un espace physique. « vers » indique une direction vague. Il y a une préposition très courte, très fréquente pour les villes…", fc:"Exactement ! Pour toutes les villes, on utilise « à » : à Paris, à Alger, à Lyon. C'est une règle fixe." },
-      { type:"question", text:"Bien ! Maintenant, essaie de former toi-même deux phrases avec la même structure : une avec Rome et une avec Oran." },
-      { type:"qcm", text:"Attention, pour les pays la règle change. « Je vais ___ France » — quelle préposition ?", options:["à","en","au","dans"], correct:"en", fw:"Rappel : les pays féminins (France, Algérie, Espagne…) ne prennent pas « à ». « au » c'est pour les pays masculins (au Maroc, au Japon). Pour les pays féminins ?", fc:"Bien ! Pays féminin → « en ». Pays masculin → « au ». Ville → « à ». Tu peux maintenant distinguer les trois cas ?" },
+      { type:"q", text:"Regarde la partie en rouge. La phrase exprime un déplacement vers une ville précise. En arabe, la particule لـ dans « أنا رايح لباريس » indique une direction. Existe-t-il une préposition française courte qui joue ce même rôle devant un nom de ville ?" },
+      { type:"qcm", text:"Pour indiquer qu'on se déplace vers une ville ou qu'on y réside, quelle préposition utilise-t-on en français ?",
+        opts:["à","en","pour","vers"], ok:"à",
+        fw:"Réfléchis : « en » accompagne les pays féminins, pas les villes. « pour » indique un but ou une durée. « vers » donne une direction vague et approximative. Pour une ville précise, il y a une préposition plus courte.",
+        fc:"Bien ! Une ville est toujours précédée de cette préposition : elle part à Paris, il vit à Alger, nous allons à Lyon. Est-ce que tu vois la régularité de la règle ?"
+      },
+      { type:"open_corrected",
+        text:"Essaie de formuler toi-même deux phrases : quelqu'un se rend dans une ville de ton choix.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant a proposé des phrases avec une ville. Évalue-les avec bienveillance. Si l'intention est bonne même avec une petite imperfection, valide (approved:true) et corrige doucement dans le feedback. Ne bloque (approved:false) que si la réponse est vide ou totalement incorrecte — dans ce cas propose un exemple modèle naturel."
+      }
     ]
   },
-  habiter_ville: { label:"Habiter + ville",
+
+  dest_ville_2: { label:"Destination : ville",
     steps:[
-      { type:"question", text:"La phrase en rouge parle d'un lieu de résidence. En arabe, comment dit-on « elle vit à Lyon » ? Y a-t-il une particule qui indique le lieu ?" },
-      { type:"qcm", text:"Pour indiquer le lieu où quelqu'un habite (une ville précise), quelle préposition emploie-t-on ?", options:["à","en","dans","chez"], correct:"à", fw:"« chez » s'utilise avec une personne (chez Pierre, chez ma tante). « en » avec un pays féminin. « dans » avec un espace général (dans le quartier). Pour une ville précise comme Lyon ?", fc:"Oui ! Habiter à + ville. Elle habite à Lyon, à Béjaïa, à Marseille. C'est la même préposition que pour « aller à »." },
+      { type:"q", text:"Cette fois c'est la ville d'Alger. Tu as déjà travaillé un cas similaire dans la phrase précédente. Est-ce que le fait qu'il s'agisse d'une ville africaine change quelque chose à la règle que tu as vue ?" },
+      { type:"qcm", text:"Alger est le nom d'une ville. Pour s'installer dans une ville — quelle que soit sa localisation géographique — quelle préposition utilise-t-on ?",
+        opts:["à","en","dans","pour"], ok:"à",
+        fw:"La règle ne dépend pas de la localisation géographique de la ville. Paris, Alger, Tokyo, Buenos Aires — la logique est exactement la même pour tous les noms de villes.",
+        fc:"Exactement ! La règle est universelle : s'installer à Alger, s'installer à Paris, s'installer à Tokyo, s'installer à Buenos Aires. Le nom de la ville, partout dans le monde, appelle toujours cette même préposition."
+      },
+      { type:"open_corrected",
+        text:"Reformule une phrase avec la même structure en utilisant une ville différente de celles déjà vues.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant propose une phrase avec une ville. Sois généreux : si l'intention est claire, valide (approved:true) en corrigeant légèrement si besoin. Bloque (approved:false) seulement si la réponse est vide ou complètement hors sujet."
+      }
     ]
   },
-  moyen_transport: { label:"Moyen de transport",
+
+  assister_a: { label:"Verbe + préposition",
     steps:[
-      { type:"question", text:"Dans la phrase en rouge, il s'agit d'un moyen de transport. Quand tu prends l'avion, où es-tu physiquement ? À l'intérieur ou à l'extérieur ?" },
-      { type:"qcm", text:"On est à l'intérieur de l'avion pendant le voyage. Quelle préposition exprime l'idée d'utiliser un véhicule qu'on occupe de l'intérieur ?", options:["en","par","avec","à"], correct:"en", fw:"Pense à l'image : on entre dans l'avion, on s'assoit dedans, on est enfermé. « avec » s'utilise pour un outil ou une compagnie. « par » introduit un agent ou un moyen très général. Quelle préposition évoque le fait d'être à l'intérieur ?", fc:"Oui ! On voyage en avion, en voiture, en train — on est à l'intérieur. Mais à vélo, à pied — car on n'est pas « enfermé » dedans." },
-      { type:"question", text:"Maintenant classe ces mots avec la bonne préposition : voiture / vélo / bus / pied / moto. Laquelle prend « en » et laquelle prend « à » ?" },
+      { type:"q", text:"Le verbe « assister » dans cette phrase signifie être présent à un événement — pas aider quelqu'un. En arabe, « حضر » (ḥaḍara) est souvent suivi directement de son complément. En français, ce verbe exige une préposition fixe entre lui et son complément. Laquelle selon toi ?" },
+      { type:"qcm", text:"« Assister » au sens de « être présent à un événement » est toujours suivi de :",
+        opts:["à","de","sur","pour"], ok:"à",
+        fw:"« Assister de » n'existe pas dans ce sens. « Assister sur » n'est pas idiomatique. « Assister pour » indique un but, pas la présence. Ce verbe a une seule préposition fixe — pense à « participer à quelque chose ».",
+        fc:"Oui ! C'est une construction figée : assister à un colloque, assister à une conférence, assister à une cérémonie. La préposition ne change jamais avec ce verbe dans ce sens."
+      },
+      { type:"open_corrected",
+        text:"Essaie de trouver deux autres verbes qui se construisent avec la même préposition fixe pour indiquer la participation ou la présence à quelque chose.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant cherche des verbes qui se construisent comme 'assister à'. Sois bienveillant : si au moins un verbe est bien utilisé dans une phrase, valide (approved:true) avec un encouragement. Propose un exemple complémentaire dans le feedback. Bloque (approved:false) seulement si la réponse est vide ou hors sujet."
+      }
     ]
   },
-  appartenance: { label:"Appartenance (de)",
-    steps:[
-      { type:"question", text:"La phrase en rouge exprime à qui appartient un objet. En arabe, l'appartenance s'exprime souvent avec « لـ » (li-). En français, quelle petite préposition permet de dire qu'une chose appartient à quelqu'un dans la structure « c'est le livre ___ Pierre » ?" },
-      { type:"qcm", text:"Pour relier un objet à son propriétaire dans « c'est le livre ___ Pierre », on utilise :", options:["de","à","par","pour"], correct:"de", fw:"Attention : « à » indique une destination ou un lien indirect (donner quelque chose à quelqu'un). Pour l'appartenance dans cette construction nominale, c'est une autre préposition. Pensez à « le livre DE Pierre ».", fc:"Exact ! Le livre de Pierre, la voiture de ma mère, le stylo de l'élève. « de » + nom = appartenance dans le groupe nominal." },
-    ]
-  },
+
   pays_fem: { label:"Pays féminins",
     steps:[
-      { type:"question", text:"La phrase en rouge parle d'un pays. En français, les pays ont un genre (masculin ou féminin). Est-ce que « Algérie » est masculin ou féminin ? Comment peut-on le savoir ?" },
-      { type:"qcm", text:"Les pays féminins (qui finissent souvent en -e : France, Algérie, Espagne…) utilisent quelle préposition pour indiquer le lieu ou l'origine ?", options:["en","au","à","dans"], correct:"en", fw:"« au » s'utilise avec les pays masculins (au Maroc, au Japon, au Canada). Pour un pays féminin comme l'Algérie, c'est différent.", fc:"Oui ! Pays féminin → en. Pays masculin → au. Ville → à. Trois règles simples à retenir." },
-      { type:"question", text:"Essaie de placer la bonne préposition devant : Espagne / Canada / Tunisie / Portugal / Chine." },
+      { type:"q", text:"La phrase en rouge contient le mot « Espagne ». En français, les pays ont un genre grammatical. Observe la terminaison du mot Espagne — que remarques-tu ? Est-ce un indice pour déterminer son genre ?" },
+      { type:"qcm", text:"Les pays dont le nom se termine en -e muet (France, Espagne, Chine, Algérie…) sont généralement féminins. Pour ces pays, quelle préposition indique le lieu ou la durée de séjour ?",
+        opts:["en","à","au","dans"], ok:"en",
+        fw:"Rappelle-toi : « au » accompagne les pays masculins — le Maroc devient au Maroc, le Japon devient au Japon. « à » est réservé aux villes. « dans » s'utilise pour des espaces physiques. Pour un pays féminin, c'est différent.",
+        fc:"Bien raisonné ! Pour les pays féminins : vivre en Espagne, voyager en France, travailler en Algérie, étudier en Italie. Pour les pays masculins ce serait : vivre au Maroc, voyager au Japon, étudier au Canada."
+      },
+      { type:"open_corrected",
+        text:"Classe ces pays en utilisant la préposition qui convient : Tunisie / Maroc / Italie / Canada / Chine / Portugal.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant classe des pays (Tunisie/en, Maroc/au, Italie/en, Canada/au, Chine/en, Portugal/au). Sois généreux : si la majorité est correcte, valide (approved:true) et mentionne les erreurs restantes dans le feedback avec les formes correctes en phrases. Bloque (approved:false) seulement si la réponse est vide ou si presque tout est faux."
+      }
     ]
   },
-  parler_de: { label:"Parler de",
+
+  parler_de: { label:"Verbe + préposition",
     steps:[
-      { type:"question", text:"Dans la phrase en rouge, le verbe « parler » est suivi d'un complément. En arabe, le verbe « تكلّم عن » (takallama ʿan) est-il suivi directement de son complément ou d'une préposition ?" },
-      { type:"qcm", text:"« Il parle ___ son voyage. » Le verbe parler, quand il introduit un sujet de conversation, est suivi de :", options:["de","sur","à","pour"], correct:"de", fw:"« parler sur » n'existe pas en français standard. Il y a une préposition fixe qui accompagne toujours « parler » + sujet de conversation. C'est une construction figée.", fc:"Oui ! Parler DE est une construction fixe : il parle de son voyage, de sa famille, de ses projets. C'est toujours « de »." },
+      { type:"q", text:"Dans la phrase en rouge, le verbe « parler » introduit un thème de conversation — ses recherches. En arabe, « تكلّم عن » (takallama ʿan) utilise « عن ». En français, ce verbe a aussi une préposition fixe quand il introduit le contenu de la conversation. Laquelle ?" },
+      { type:"qcm", text:"Quand « parler » introduit le sujet d'une conversation, il est suivi de :",
+        opts:["de","sur","à","pour"], ok:"de",
+        fw:"« Parler sur » est un calque de l'anglais « talk on/about » — c'est une erreur fréquente, évitée en français soutenu. « Parler à » désigne la personne à qui on s'adresse, pas le sujet de la conversation. Il y a une préposition précise pour le contenu.",
+        fc:"Exactement ! C'est une construction figée : parler de ses recherches, parler de son travail, parler de ses projets. Cette préposition introduit toujours le thème dont on parle."
+      },
+      { type:"open_corrected",
+        text:"Quelle différence y a-t-il entre « parler à quelqu'un » et « parler de quelque chose » ? Illustre les deux sens avec un exemple de ton choix pour chacun.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant illustre la différence entre 'parler à' et 'parler de'. Si au moins une des deux constructions est correctement illustrée, valide (approved:true) et complète avec l'autre dans le feedback. Bloque (approved:false) seulement si la réponse est vide ou si les deux constructions sont confondues."
+      }
     ]
   },
-  penser_a: { label:"Penser à",
+
+  lieu_ferme: { label:"Lieu fermé",
     steps:[
-      { type:"question", text:"La phrase en rouge utilise le verbe « penser ». Ce verbe change de préposition selon son sens. Selon toi, quelle différence y a-t-il entre « je pense à toi » et « que penses-tu de ce film » ?" },
-      { type:"qcm", text:"Pour « avoir quelqu'un en tête, ne pas l'oublier », le verbe penser est suivi de :", options:["à","de","sur","pour"], correct:"à", fw:"Attention : « penser de » existe mais exprime un avis, une opinion (Que penses-tu de ce livre ?). Pour l'idée d'avoir quelqu'un ou quelque chose dans ses pensées, c'est une autre préposition.", fc:"Parfait ! Penser À = avoir en tête. Je pense à toi, à mes parents, à l'examen. « Penser de » = donner son avis." },
+      { type:"q", text:"La phrase mentionne la bibliothèque — un bâtiment que l'on entre, un espace clos avec des murs. En arabe, « في » (fī) indique l'intérieur d'un espace. En français, y a-t-il une préposition qui traduit précisément cette idée d'être physiquement à l'intérieur d'un espace fermé ?" },
+      { type:"qcm", text:"Pour désigner un lieu fermé ou délimité où l'on se trouve physiquement (bibliothèque, bureau, laboratoire…), quelle préposition utilise-t-on ?",
+        opts:["dans","à","en","sur"], ok:"dans",
+        fw:"« À la bibliothèque » est possible, mais il y a une nuance importante : « à » marque simplement le lieu, tandis qu'une autre préposition insiste sur le fait d'être physiquement à l'intérieur, d'occuper l'espace intérieur du bâtiment.",
+        fc:"C'est ça ! Cette préposition souligne l'intériorité : travailler dans la bibliothèque, étudier dans le laboratoire, se retrouver dans la salle de classe, chercher dans les archives."
+      },
+      { type:"open_corrected",
+        text:"Comment distingues-tu « travailler dans une entreprise » et « travailler pour une entreprise » ? Qu'est-ce que chacune exprime de différent ?",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant réfléchit à la nuance entre 'dans' et 'pour'. Si sa réponse montre une compréhension partielle de la différence, valide (approved:true) et enrichis avec une phrase exemple. Bloque (approved:false) seulement si la réponse est vide ou complètement à côté."
+      }
     ]
   },
-  position: { label:"Prépositions spatiales",
+
+  porter_sur: { label:"Verbe + préposition",
     steps:[
-      { type:"question", text:"La phrase en rouge décrit où est posé un vase par rapport à la table. Est-ce que le vase est à l'intérieur de la table, ou bien sur sa surface supérieure ?" },
-      { type:"qcm", text:"Le vase touche la surface du dessus de la table. Quelle préposition indique le contact avec une surface ?", options:["sur","dans","à","en"], correct:"sur", fw:"« dans » indique l'intérieur d'un espace fermé (dans la boîte, dans le tiroir). Ici le vase n'est pas à l'intérieur de la table, il est posé sur sa face supérieure.", fc:"Exactement ! « sur » = posé sur une surface. « dans » = à l'intérieur. Le vase sur la table, les clés dans le tiroir." },
-      { type:"question", text:"Essaie de compléter : Le chat est ___ le canapé. Le stylo est ___ le sac. L'affiche est ___ le mur." },
+      { type:"q", text:"Dans la phrase en rouge, le verbe « porter » a un sens figuré — il ne s'agit pas de transporter physiquement quelque chose. Quand on dit « son mémoire porte… », cela signifie que le mémoire traite d'un sujet, qu'il a un contenu. Quelle préposition introduit ce contenu ou cet objet d'étude ?" },
+      { type:"qcm", text:"Le verbe « porter » au sens figuré (traiter d'un sujet, avoir pour thème) est suivi de :",
+        opts:["sur","de","à","pour"], ok:"sur",
+        fw:"Pense à des constructions proches : « son attention se porte sur quelque chose », « la discussion porte sur un point précis ». Il y a une préposition qui exprime la cible, l'objet vers lequel se dirige une attention ou un contenu intellectuel.",
+        fc:"Exactement ! Porter sur = avoir pour thème : son mémoire porte sur la phonologie, sa thèse porte sur l'acquisition du lexique, son article porte sur l'enseignement des prépositions."
+      },
+      { type:"open_corrected",
+        text:"Reformule le sens de « son mémoire porte sur… » avec tes propres mots, et propose un synonyme verbal pour remplacer « porte sur ».",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant reformule 'porter sur' et cherche un synonyme. Sois généreux : si au moins l'un des deux éléments est présent, valide (approved:true) et enrichis le feedback avec l'élément manquant. Bloque (approved:false) seulement si la réponse est vide ou hors sujet."
+      }
     ]
   },
+
+  impact_sur: { label:"Influence / impact",
+    steps:[
+      { type:"q", text:"La partie en rouge exprime une relation entre les réseaux sociaux et le discours politique — une influence, un effet exercé sur quelque chose. En arabe, « التأثير على » utilise « على ». Quelle préposition française traduit cette idée d'une influence orientée vers une cible précise ?" },
+      { type:"qcm", text:"Pour exprimer l'influence, l'effet ou l'impact d'une chose sur une autre, quelle préposition utilise-t-on ?",
+        opts:["sur","dans","en","de"], ok:"sur",
+        fw:"« L'impact dans le discours » n'est pas idiomatique. « L'impact de » indique la source, pas la cible. Il y a une préposition qui désigne la cible d'une influence — celle qui correspond le mieux à « على » dans les constructions nominales arabes.",
+        fc:"Très bien ! Cette préposition indique la cible d'une influence : l'impact des médias sur l'opinion publique, l'effet du stress sur la mémoire, l'influence de la culture sur le langage."
+      }
+    ]
+  },
+
+  postuler_pour: { label:"Verbe + préposition",
+    steps:[
+      { type:"q", text:"Dans la phrase en rouge, il s'agit de candidater à un emploi. Le verbe « postuler » est suivi d'un complément indiquant l'objectif visé — ce qu'on cherche à obtenir. Quelle préposition introduit en français une finalité, un objectif à atteindre ?" },
+      { type:"qcm", text:"Le verbe « postuler » (candidater pour obtenir quelque chose) est suivi de :",
+        opts:["pour","à","de","en"], ok:"pour",
+        fw:"« Postuler à » existe aussi, mais il y a une préposition qui exprime encore plus clairement la finalité, l'objectif visé. Pense à « se battre pour une cause » ou « candidater pour un poste ».",
+        fc:"Exactement ! Cette préposition introduit un but ou un objectif : postuler pour un emploi, candidater pour une bourse, se porter candidat pour un concours."
+      }
+    ]
+  },
+
+  lieu_orga: { label:"Appartenance à une structure",
+    steps:[
+      { type:"q", text:"Ce blanc concerne la structure dans laquelle la personne va travailler. Une ONG est une organisation institutionnelle. Quelle préposition permet d'exprimer qu'on fait partie de l'intérieur d'une organisation, qu'on y est intégré ?" },
+      { type:"qcm", text:"Pour indiquer qu'on travaille au sein d'une organisation, d'une entreprise, d'une institution, on utilise :",
+        opts:["dans","à","en","de"], ok:"dans",
+        fw:"« Travailler à » est possible avec certains lieux (travailler à l'université, à l'hôpital), mais pour une organisation générique, il y a une préposition qui insiste sur l'appartenance interne, le fait d'en faire partie de l'intérieur.",
+        fc:"Oui ! Travailler dans une ONG, travailler dans une entreprise, travailler dans une association — cette préposition souligne l'intégration dans la structure."
+      }
+    ]
+  },
+
+  collab_avec: { label:"Verbe + préposition",
+    steps:[
+      { type:"q", text:"Dans la phrase en rouge, il s'agit de travailler conjointement avec d'autres personnes. Le verbe « collaborer » exprime une action commune. En arabe, « تعاون مع » (taʿāwana maʿa) utilise « مع ». Quelle préposition française traduit cette idée d'une action menée ensemble avec quelqu'un ?" },
+      { type:"qcm", text:"Le verbe « collaborer » (travailler ensemble) est suivi de :",
+        opts:["avec","de","à","pour"], ok:"avec",
+        fw:"« Collaborer de » et « collaborer à » n'existent pas dans ce sens. « Collaborer pour » indique un but mais ne désigne pas les partenaires. Il y a une préposition qui introduit les personnes avec qui on partage une action — celle qui correspond à « مع ».",
+        fc:"Exact ! Collaborer avec des collègues, travailler avec des spécialistes, coopérer avec des partenaires. Cette préposition introduit toujours le partenaire d'une action commune."
+      },
+      { type:"open_corrected",
+        text:"Trouve deux autres verbes qui décrivent une action menée conjointement avec quelqu'un, et construis une phrase complète avec chacun.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant propose des verbes exprimant une action conjointe. Si au moins un exemple est bien construit, valide (approved:true) et suggère un autre verbe dans le feedback. Bloque (approved:false) seulement si la réponse est vide ou si aucun exemple n'est correct."
+      }
+    ]
+  },
+
+  domaine_dans: { label:"Domaine / champ",
+    steps:[
+      { type:"q", text:"Ce blanc désigne la spécialité des collaborateurs — la linguistique. L'expression « ___ domaine de la linguistique » désigne un champ disciplinaire, un espace du savoir. Quelle préposition permet d'introduire un domaine ou un champ en français ?" },
+      { type:"qcm", text:"Pour introduire un domaine, un champ disciplinaire ou un secteur d'activité, l'expression figée est :",
+        opts:["dans","de","en","sur"], ok:"dans",
+        fw:"« En domaine » n'est pas usuel. « De domaine » n'existe pas. « Sur le domaine » est incorrect. Il y a une expression figée en français pour désigner un espace conceptuel ou disciplinaire.",
+        fc:"Oui ! C'est une expression figée : dans le domaine de la linguistique, dans le domaine des sciences humaines, dans le domaine de l'intelligence artificielle. On peut aussi dire : dans le champ de, dans le secteur de."
+      }
+    ]
+  },
+
+  diriger_vers: { label:"Direction",
+    steps:[
+      { type:"q", text:"Dans la phrase en rouge, il s'agit d'une orientation professionnelle — un mouvement figuré vers un objectif futur. Le verbe « se diriger » exprime une trajectoire. En arabe, « اتجه نحو » (ittajaha naḥwa) utilise « نحو » qui signifie « en direction de ». Quelle préposition française exprime cette même idée de direction progressive ?" },
+      { type:"qcm", text:"Le verbe « se diriger » (s'orienter progressivement vers quelque chose) est suivi de :",
+        opts:["vers","à","pour","en"], ok:"vers",
+        fw:"« Se diriger à » n'est pas idiomatique. « Se diriger pour » indique un but mais pas une direction. « Se diriger en » ne fonctionne pas ici. Il y a une préposition qui traduit exactement l'idée d'une direction ou d'une orientation progressive.",
+        fc:"Exactement ! Cette préposition exprime une direction ou une orientation : se diriger vers une carrière, tendre vers un objectif, avancer vers un idéal. Elle indique la cible d'un mouvement figuré."
+      }
+    ]
+  },
+
+  chez_nous: { label:"Expression idiomatique",
+    steps:[
+      { type:"q", text:"La phrase commence par un blanc suivi de « nous ». Il s'agit d'une expression idiomatique qui désigne l'espace culturel ou communautaire — ce qu'on dirait en arabe « عندنا » (ʿindanā). Quelle préposition française crée cette expression avec un pronom personnel ou un nom de groupe ?" },
+      { type:"qcm", text:"L'expression « ___ nous » pour dire « dans notre culture / dans notre milieu » utilise :",
+        opts:["Chez","Pour","Entre","En"], ok:"Chez",
+        fw:"« Pour nous » exprime un point de vue, une opinion. « Entre nous » signifie quelque chose dit en secret. « En nous » n'est pas idiomatique ici. Il y a une préposition qui, suivie d'un pronom, crée une expression désignant l'espace culturel ou communautaire d'un groupe.",
+        fc:"Oui ! Chez nous désigne notre espace culturel ou domestique. Cette construction s'étend : chez les chercheurs, chez les jeunes, chez les enseignants — pour désigner les habitudes ou pratiques d'un groupe."
+      },
+      { type:"open_corrected",
+        text:"Donne trois exemples de phrases avec cette même structure, en utilisant un pronom ou un nom de groupe différent à chaque fois.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant propose des phrases avec 'chez + groupe'. Si au moins deux phrases sont correctes, valide (approved:true) avec un encouragement. Si une seule est bonne ou si la réponse est vide, aide avec un exemple modèle (approved:false)."
+      }
+    ]
+  },
+
+  debattre_de: { label:"Verbe + préposition",
+    steps:[
+      { type:"q", text:"Dans la phrase en rouge, le verbe « débattre » introduit le thème qui est discuté — les sujets philosophiques. En arabe, « ناقش » (nāqaša) peut être suivi directement de son complément. En français, « débattre » a une préposition fixe pour introduire le thème du débat. Laquelle ?" },
+      { type:"qcm", text:"Le verbe « débattre » (discuter, échanger des arguments sur un sujet) est suivi de :",
+        opts:["de","sur","à","pour"], ok:"de",
+        fw:"« Débattre sur » est parfois employé par analogie, mais la construction standard en français académique est différente. Il y a une préposition précise pour introduire le thème d'un débat — la même qui accompagne « parler » quand il introduit un sujet de conversation.",
+        fc:"Oui ! Débattre est toujours suivi de cette préposition en français soutenu : débattre de sujets philosophiques, débattre de questions politiques, débattre de l'avenir de l'éducation. C'est la même construction que parler de, discuter de."
+      }
+    ]
+  },
+
+  par_consensus: { label:"Expression figée",
+    steps:[
+      { type:"q", text:"La phrase décrit comment une décision a été prise — « ___ consensus ». Il s'agit du mode, du mécanisme par lequel la décision a eu lieu. En arabe, « بالإجماع » utilise « بـ » (bi-) qui indique le moyen ou la manière. Quelle préposition française traduit ce sens de moyen ou de mécanisme d'une action ?" },
+      { type:"qcm", text:"Pour exprimer le moyen ou le mécanisme par lequel quelque chose est accompli, on utilise :",
+        opts:["par","en","avec","de"], ok:"par",
+        fw:"« En consensus » n'est pas une expression française. « Avec consensus » est incorrect. « De consensus » change le sens. Il y a une préposition qui introduit le moyen, le mécanisme ou l'agent d'une action — très fréquente dans la langue formelle et académique.",
+        fc:"Bien ! Cette préposition introduit le moyen ou le mécanisme : décider par vote, agir par nécessité, trancher par arbitrage, communiquer par écrit. C'est une préposition centrale dans la langue académique."
+      },
+      { type:"open_corrected",
+        text:"Essaie de trouver deux autres expressions figées françaises qui utilisent la même préposition pour désigner un mode ou un mécanisme d'action.",
+        cprompt:"Tu es médiateur cognitif FLE. L'apprenant cherche des expressions avec 'par' (ex: par hasard, par écrit, par erreur, par vote). Si au moins une expression est correcte et bien utilisée, valide (approved:true) et enrichis avec une autre dans le feedback. Bloque (approved:false) seulement si la réponse est vide ou hors sujet."
+      }
+    ]
+  },
+
+  entre_membres: { label:"Relation réciproque",
+    steps:[
+      { type:"q", text:"Ce blanc désigne la relation entre plusieurs membres du jury. Il s'agit d'une relation partagée, symétrique, impliquant plusieurs acteurs. En arabe, « بين » (bayna) exprime cette réciprocité entre plusieurs entités. Quelle préposition française joue le même rôle ?" },
+      { type:"qcm", text:"Pour exprimer une relation partagée, un accord ou une interaction impliquant plusieurs personnes ou entités, on utilise :",
+        opts:["entre","avec","par","de"], ok:"entre",
+        fw:"« Avec les membres » indique une co-présence mais pas la réciprocité symétrique. « Par les membres » introduit un agent passif. Il y a une préposition qui désigne spécifiquement une relation partagée entre plusieurs participants — celle qui correspond à « بين ».",
+        fc:"Exact ! Un accord entre partenaires, un dialogue entre parties, une décision entre collègues, une complicité entre amis. Cette préposition exprime toujours la réciprocité et la relation symétrique entre plusieurs entités."
+      }
+    ]
+  }
 };
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // ÉTAT GLOBAL
-// ═══════════════════════════════════════════════════════
-let studentName = '', studentClasse = '';
-let studentAnswers = {}, errors = [];
-let currentErrorIndex = 0, currentStep = 0;
-let sessionId = '';
-let mediationLog = []; // log de toutes les interactions de médiation
-let startTime = null;
-let phasesDone = { obs: false, ana: false, med: false };
+// ═══════════════════════════════════════════
+let studentName='', studentClasse='';
+let studentAnswers={};
+let errors=[];
+let currentErrorIndex=0, currentStep=0;
+let sessionId='', startTime=null;
+let mediationLog=[];
+let mediationStarted=false;
+let qcmAttempts=0;
 
-function genSessionId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-}
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // DÉMARRAGE
-// ═══════════════════════════════════════════════════════
-function demarrer() {
-  const nom = document.getElementById('input-nom').value.trim();
-  const classe = document.getElementById('input-classe').value.trim();
-  if (!nom) { showToast('Veuillez entrer votre nom.'); return; }
-  studentName = nom;
-  studentClasse = classe;
-  sessionId = genSessionId();
-  startTime = new Date().toISOString();
-
-  document.getElementById('header-student').textContent = nom + (classe ? ' — ' + classe : '');
-  document.getElementById('header-score').style.display = 'block';
-  document.getElementById('score-display').textContent = 'Phase 1';
-
+// ═══════════════════════════════════════════
+function demarrer(){
+  const nom=document.getElementById('input-nom').value.trim();
+  const cls=document.getElementById('input-classe').value.trim();
+  if(!nom){ showToast('Veuillez entrer votre nom.'); return; }
+  studentName=nom; studentClasse=cls;
+  sessionId=genId(); startTime=new Date().toISOString();
+  document.getElementById('header-student').textContent=nom+(cls?' — '+cls:'');
+  document.getElementById('header-score').style.display='block';
+  document.getElementById('score-display').textContent='Phase 1';
   document.getElementById('screen-accueil').classList.add('hidden');
   document.getElementById('screen-main').classList.remove('hidden');
   buildExercise();
-
-  // Envoyer début de session
-  sendData({ event: 'debut_session', nom: studentName, classe: studentClasse, heure: startTime });
+  sendData({event:'debut_session',nom:studentName,classe:studentClasse,heure:startTime});
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // EXERCICE
-// ═══════════════════════════════════════════════════════
-function buildExercise() {
-  const c = document.getElementById('exercise-container');
-  c.innerHTML = sentences.map((s, i) => {
-    const p = s.full.split('___');
-    return `<li class="exercise-item">
-      <span class="ex-num">${i+1}.</span>
-      <span>${p[0]}</span>
-      <input class="fill-blank" id="ans-${i}" placeholder="___" autocomplete="off" spellcheck="false">
-      <span>${p[1]}</span>
-    </li>`;
+// ═══════════════════════════════════════════
+function buildExercise(){
+  const c=document.getElementById('exercise-container');
+  c.innerHTML=sentences.map(s=>{
+    let inner=`<span class="ex-num">${s.id}.</span>`;
+    s.parts.forEach((part,i)=>{
+      if(part) inner+=`<span>${part}</span>`;
+      if(i<s.blanks.length){
+        const b=s.blanks[i];
+        inner+=`<input class="fill-blank" id="ans-${b.id}" placeholder="___" autocomplete="off" spellcheck="false">`;
+      }
+    });
+    return `<li class="exercise-item">${inner}</li>`;
   }).join('');
 }
 
-function submitObservation() {
-  errors = [];
-  const reponsesEleve = {};
+function submitObservation(){
+  errors=[];
+  let total=0, correct=0;
+  const rep={};
 
-  sentences.forEach((s, i) => {
-    const inp = document.getElementById(`ans-${i}`);
-    const val = inp ? inp.value.trim().toLowerCase() : '';
-    studentAnswers[i] = val;
-    reponsesEleve['q'+(i+1)] = val;
-    if (val !== s.answer) {
-      inp.classList.add('wrong');
-      errors.push({ ...s, studentAnswer: val });
-    } else {
-      inp.classList.add('correct');
-    }
+  sentences.forEach(s=>{
+    s.blanks.forEach(b=>{
+      total++;
+      const inp=document.getElementById(`ans-${b.id}`);
+      const val=inp?inp.value.trim():'';
+      studentAnswers[b.id]=val;
+      rep[b.id]=val;
+      if(val.toLowerCase()===(b.answer_lc||b.answer.toLowerCase())){
+        correct++; if(inp) inp.classList.add('correct');
+      } else {
+        if(inp) inp.classList.add('wrong');
+        errors.push({sentence:s, blank:b, studentAnswer:val});
+      }
+    });
   });
 
-  const score = Math.round(((sentences.length - errors.length) / sentences.length) * 100);
-  document.getElementById('score-display').textContent = `Score : ${score}%`;
+  const score=Math.round((correct/total)*100);
+  document.getElementById('score-display').textContent=`Score : ${score}%`;
+  document.getElementById('obs-results').classList.remove('hidden');
 
-  // Afficher résultats
-  const res = document.getElementById('obs-results');
-  res.classList.remove('hidden');
-  const errDiv = document.getElementById('error-summary');
-
-  if (!errors.length) {
-    errDiv.innerHTML = '<p style="color:var(--green-text); font-size:15px;">Aucune erreur — excellent travail !</p>';
+  const errDiv=document.getElementById('error-summary');
+  if(!errors.length){
+    errDiv.innerHTML='<p style="color:var(--green-text);font-size:15px;">Aucune erreur — excellent travail !</p>';
   } else {
-    errDiv.innerHTML = `<p style="font-size:14px; color:var(--text-secondary); margin-bottom:10px;">
-      ${errors.length} erreur(s) sur ${sentences.length} phrases :
-    </p>`
-    + errors.map(e => `<div style="margin-bottom:8px;">
-        <span class="error-phrase">${e.full.replace('___', e.studentAnswer ? '<u>'+e.studentAnswer+'</u>' : '∅')}</span>
-      </div>`).join('');
+    const byPhrase={};
+    errors.forEach(e=>{
+      if(!byPhrase[e.sentence.id]) byPhrase[e.sentence.id]={s:e.sentence,errs:[]};
+      byPhrase[e.sentence.id].errs.push(e);
+    });
+    errDiv.innerHTML=`<p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">${errors.length} blanc(s) erroné(s) sur ${total} :</p>`
+      +Object.values(byPhrase).map(({s,errs})=>{
+        let phr=`<span class="ex-num">${s.id}.</span>`;
+        s.parts.forEach((part,i)=>{
+          if(part) phr+=part;
+          if(i<s.blanks.length){
+            const b=s.blanks[i];
+            const err=errs.find(e=>e.blank.id===b.id);
+            if(err) phr+=`<span class="error-inline">${err.studentAnswer||'∅'}</span>`;
+            else phr+=`<span class="correct-inline">${studentAnswers[b.id]||'✓'}</span>`;
+          }
+        });
+        return `<div style="font-size:14px;line-height:2.2;margin-bottom:10px;">${phr}</div>`;
+      }).join('');
   }
 
-  phasesDone.obs = true;
-  buildAnalysis();
-
-  // Envoyer données phase 1
-  sendData({
-    event: 'phase1_observation',
-    nom: studentName,
-    classe: studentClasse,
-    session: sessionId,
-    score_pct: score,
-    nb_erreurs: errors.length,
-    nb_correct: sentences.length - errors.length,
-    ...reponsesEleve,
-    erreurs_detail: errors.map(e => `"${e.full}" → écrit:"${e.studentAnswer||'∅'}" (attendu:"${e.answer}")`).join(' | ')
+  buildAnalysis(score, total);
+  sendData({event:'phase1_observation',nom:studentName,classe:studentClasse,session:sessionId,
+    score_pct:score,nb_erreurs:errors.length,nb_correct:correct,total_blancs:total,
+    reponses:JSON.stringify(rep),
+    erreurs_detail:errors.map(e=>`[${e.blank.id}]:"${e.studentAnswer||'∅'}"(attendu:"${e.blank.answer}")`).join(' | ')
   });
 }
 
-function resetExercise() {
-  sentences.forEach((_, i) => {
-    const inp = document.getElementById(`ans-${i}`);
-    if (inp) { inp.value = ''; inp.className = 'fill-blank'; }
-  });
+function resetExercise(){
+  sentences.forEach(s=>s.blanks.forEach(b=>{
+    const inp=document.getElementById(`ans-${b.id}`);
+    if(inp){inp.value='';inp.className='fill-blank';}
+  }));
   document.getElementById('obs-results').classList.add('hidden');
-  errors = []; studentAnswers = {};
+  errors=[];studentAnswers={};
 }
 
-// ═══════════════════════════════════════════════════════
-// ANALYSE
-// ═══════════════════════════════════════════════════════
-function buildAnalysis() {
-  const byType = {};
-  errors.forEach(e => {
-    if (!byType[e.errorType]) byType[e.errorType] = [];
-    byType[e.errorType].push(e);
+// ═══════════════════════════════════════════
+// PHASE 2 — ANALYSE
+// categoryLabel affiché, pas de préposition
+// Phrase complète avec erreur en rouge
+// ═══════════════════════════════════════════
+function buildAnalysis(score, total){
+  const byLabel={};
+  errors.forEach(e=>{
+    const lbl=e.blank.categoryLabel;
+    if(!byLabel[lbl]) byLabel[lbl]=[];
+    byLabel[lbl].push(e);
   });
 
-  document.getElementById('analysis-content').innerHTML = !errors.length
-    ? '<p style="color:var(--green-text)">Aucune erreur à analyser.</p>'
-    : Object.entries(byType).map(([type, errs]) =>
-        `<div class="analysis-row">
+  document.getElementById('analysis-content').innerHTML=!errors.length
+    ?'<p style="color:var(--green-text)">Aucune erreur à analyser.</p>'
+    :Object.entries(byLabel).map(([label,errs])=>{
+        const phrasesHtml=errs.map(e=>{
+          let phr=`<span class="ex-num">${e.sentence.id}.</span>`;
+          e.sentence.parts.forEach((part,i)=>{
+            if(part) phr+=part;
+            if(i<e.sentence.blanks.length){
+              const b=e.sentence.blanks[i];
+              if(b.id===e.blank.id){
+                phr+=`<span class="error-inline">${e.studentAnswer||'∅'}</span>`;
+              } else {
+                const v=studentAnswers[b.id];
+                const isErr=errors.some(x=>x.blank.id===b.id);
+                phr+=isErr
+                  ?`<span class="error-inline">${v||'∅'}</span>`
+                  :`<span class="neutral-inline">${v||'___'}</span>`;
+              }
+            }
+          });
+          return `<p style="font-size:13px;color:var(--text-secondary);line-height:2;margin-top:4px;">${phr}</p>`;
+        }).join('');
+        return `<div class="analysis-row">
           <div style="flex:1">
-            <p style="font-size:14px; font-weight:500; margin-bottom:4px;">${type}</p>
-            ${errs.map(e => `<p style="font-size:13px; color:var(--text-secondary);">
-              ${e.full.replace('___','<em>___</em>')} — écrit : <span style="color:var(--red)">${e.studentAnswer||'∅'}</span>
-            </p>`).join('')}
+            <p style="font-size:14px;font-weight:500;margin-bottom:3px;">${label}</p>
+            ${phrasesHtml}
           </div>
-          <span class="tag-wrong">${errs.length} erreur(s)</span>
-        </div>`
-      ).join('');
+          <span class="tag-wrong">${errs.length}</span>
+        </div>`;
+      }).join('');
 
-  const score = Math.round(((sentences.length - errors.length) / sentences.length) * 100);
-  const main = Object.entries(byType).sort((a,b)=>b[1].length-a[1].length)[0];
-
-  document.getElementById('learner-profile').innerHTML = `
+  const main=Object.entries(byLabel).sort((a,b)=>b[1].length-a[1].length)[0];
+  document.getElementById('learner-profile').innerHTML=`
     <div class="metrics">
       <div class="metric">
         <p class="metric-label">Score</p>
@@ -641,248 +645,303 @@ function buildAnalysis() {
       </div>
       <div class="metric">
         <p class="metric-label">Erreurs</p>
-        <p class="metric-val">${errors.length}/${sentences.length}</p>
+        <p class="metric-val">${errors.length}/${total}</p>
       </div>
-      <div class="metric" style="flex:2; text-align:left;">
+      <div class="metric" style="flex:2;text-align:left;padding:12px 16px;">
         <p class="metric-label">Lacune principale</p>
-        <p style="font-size:14px; font-weight:500; margin-top:4px;">${main ? main[0] : '—'}</p>
+        <p style="font-size:13px;font-weight:500;margin-top:4px;">${main?main[0]:'—'}</p>
       </div>
     </div>`;
 }
 
-// ═══════════════════════════════════════════════════════
-// MÉDIATION
-// ═══════════════════════════════════════════════════════
-function startMediation() {
-  currentErrorIndex = 0;
-  mediationLog = [];
-  loadMediationStep();
+// ═══════════════════════════════════════════
+// PHASE 3 — MÉDIATION
+// ═══════════════════════════════════════════
+function startMediation(){
+  if(mediationStarted) return;
+  mediationStarted=true;
+  currentErrorIndex=0; mediationLog=[];
+  loadStep();
 }
 
-function loadMediationStep() {
-  const list = errors.length ? errors : sentences.map(s => ({...s, studentAnswer:'?'}));
-  const area = document.getElementById('mediation-area');
-  const pct = Math.round((currentErrorIndex / list.length) * 100);
-  document.getElementById('med-progress').style.width = pct + '%';
+function loadStep(){
+  const list=errors.length?errors
+    :sentences.flatMap(s=>s.blanks.map(b=>({sentence:s,blank:b,studentAnswer:'?'})));
+  const area=document.getElementById('mediation-area');
+  const pct=Math.round((currentErrorIndex/list.length)*100);
+  document.getElementById('med-progress').style.width=pct+'%';
 
-  if (currentErrorIndex >= list.length) {
-    area.innerHTML = `<div class="card" style="text-align:center; padding:2rem;">
-      <p style="font-size:20px; font-weight:500; margin-bottom:8px;">Médiation terminée ✓</p>
-      <p style="font-size:14px; color:var(--text-secondary); margin-bottom:16px;">
-        Vous avez travaillé toutes les lacunes identifiées.<br>
-        Vos données ont été enregistrées.
-      </p>
-      <p style="font-size:13px; color:var(--text-secondary);">Merci ${studentName} !</p>
+  if(currentErrorIndex>=list.length){
+    area.innerHTML=`<div class="card" style="text-align:center;padding:2rem;">
+      <p style="font-size:20px;font-weight:500;margin-bottom:10px;">Médiation terminée</p>
+      <p style="font-size:14px;color:var(--text-secondary);">Vous avez travaillé toutes les difficultés identifiées.<br>Vos données ont été enregistrées.</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:12px;">Merci, ${studentName} !</p>
     </div>`;
-    document.getElementById('progress-label').textContent = 'Terminé';
-
-    // Envoyer données phase 3 complètes
-    sendData({
-      event: 'phase3_mediation_terminee',
-      nom: studentName,
-      classe: studentClasse,
-      session: sessionId,
-      nb_lacunes_travaillees: currentErrorIndex,
-      log_interactions: mediationLog.map(l =>
-        `[${l.lacune}] Q:${l.question_type} R:"${l.reponse_eleve}" Correct:${l.correct}`
-      ).join(' || ')
+    document.getElementById('progress-label').textContent='Terminé';
+    sendData({event:'phase3_terminee',nom:studentName,classe:studentClasse,session:sessionId,
+      nb_lacunes:currentErrorIndex,
+      log:mediationLog.map(l=>`[${l.lacune}] ${l.type} rep:"${l.rep}" ok:${l.ok} essais:${l.n}`).join(' || ')
     });
     return;
   }
 
-  const err = list[currentErrorIndex];
-  const dialog = mediationDialogs[err.context];
-  currentStep = 0;
+  const item=list[currentErrorIndex];
+  const dlg=dialogs[item.blank.context];
+  currentStep=0; qcmAttempts=0;
+  resetOpenConv();
 
-  document.getElementById('progress-label').innerHTML =
-    `Lacune ${currentErrorIndex+1} sur ${list.length} — <strong>${dialog ? dialog.label : err.errorType}</strong>`;
+  document.getElementById('progress-label').innerHTML=
+    `Lacune ${currentErrorIndex+1} sur ${list.length} — <strong>${dlg?dlg.label:item.blank.categoryLabel}</strong>`;
 
-  area.innerHTML = `<div class="card" id="med-card">
-    <p style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Phrase à corriger :</p>
-    <p class="error-phrase" style="font-size:15px; margin-bottom:16px;">
-      ${err.full.replace('___', err.studentAnswer && err.studentAnswer !== '?' ? '<u>'+err.studentAnswer+'</u>' : '___')}
-    </p>
+  // Phrase : blanc fautif en rouge, autres blancs neutres
+  let phr=`${item.sentence.id}. `;
+  item.sentence.parts.forEach((part,i)=>{
+    if(part) phr+=part;
+    if(i<item.sentence.blanks.length){
+      const b=item.sentence.blanks[i];
+      if(b.id===item.blank.id){
+        const shown=item.studentAnswer&&item.studentAnswer!=='?'
+          ?`<span style="text-decoration:underline">${item.studentAnswer}</span>`:'___';
+        phr+=`<span class="error-inline">${shown}</span>`;
+      } else {
+        phr+=`<span class="neutral-inline">${studentAnswers[b.id]||'___'}</span>`;
+      }
+    }
+  });
+
+  area.innerHTML=`<div class="card" id="med-card">
+    <p style="font-size:11px;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Phrase à travailler</p>
+    <p style="font-size:15px;line-height:2.2;margin-bottom:16px;">${phr}</p>
     <div class="chat-area" id="chat-area"></div>
   </div>`;
 
-  if (dialog) appendAndRender(dialog.steps[0]);
+  if(dlg) renderStep(dlg.steps[0]);
+  else { addBub("Réfléchissons ensemble. Qu'est-ce qui t'a guidé dans ton choix pour ce blanc ?"); addTextInput(null); }
 }
 
-function appendAndRender(step) {
-  const area = document.getElementById('chat-area');
+function renderStep(step){
+  const area=document.getElementById('chat-area');
+  const b=document.createElement('div');
+  b.className='chat-bubble';
+  b.textContent=step.text||step.text;
+  area.appendChild(b);
+  area.scrollTop=area.scrollHeight;
 
-  // Bulle médiateur
-  const bubble = document.createElement('div');
-  bubble.className = 'chat-bubble';
-  bubble.textContent = step.text;
-  area.appendChild(bubble);
-
-  if (step.type === 'qcm') {
-    const wrap = document.createElement('div');
-    wrap.className = 'options-wrap';
-    step.options.forEach(o => {
-      const b = document.createElement('button');
-      b.className = 'option-btn';
-      b.textContent = o;
-      b.onclick = () => handleQCM(b, o, step, wrap);
-      wrap.appendChild(b);
+  if(step.type==='qcm'){
+    const wrap=document.createElement('div');
+    wrap.className='options-wrap';
+    step.opts.forEach(o=>{
+      const btn=document.createElement('button');
+      btn.className='option-btn'; btn.textContent=o;
+      btn.onclick=()=>handleQCM(btn,o,step,wrap);
+      wrap.appendChild(btn);
     });
     area.appendChild(wrap);
+  } else if(step.type==='open_corrected'){
+    addTextInput(step.cprompt);
   } else {
-    const wrap = document.createElement('div');
-    const ta = document.createElement('textarea');
-    ta.className = 'student-input';
-    ta.placeholder = 'Écris ta réponse ici…';
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.style.marginTop = '8px';
-    btn.textContent = 'Continuer →';
-    btn.onclick = () => {
-      const val = ta.value.trim();
-      if (!val) return;
-      addUserBubble(val);
-      logInteraction('question_ouverte', val, null);
-      wrap.remove();
-      currentStep++;
-      advance();
-    };
-    wrap.appendChild(ta);
-    wrap.appendChild(btn);
-    area.appendChild(wrap);
+    addTextInput(null);
   }
-  area.scrollTop = area.scrollHeight;
 }
 
-let qcmAttempts = 0;
-
-function handleQCM(btn, val, step, wrap) {
+function handleQCM(btn,val,step,wrap){
   qcmAttempts++;
-  wrap.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-
-  if (val === step.correct) {
+  wrap.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  const correct=val.toLowerCase()===step.ok.toLowerCase();
+  if(correct){
     btn.classList.add('ok');
-    addBubble(step.fc, 'system');
-    logInteraction('qcm', val, true, qcmAttempts);
-    qcmAttempts = 0;
-    currentStep++;
-    setTimeout(advance, 700);
+    addBub(step.fc,'confirm');
+    logM('qcm',val,true,qcmAttempts);
+    qcmAttempts=0; currentStep++;
+    setTimeout(nextStep,700);
   } else {
     btn.classList.add('ko');
-    addBubble(step.fw);
-    logInteraction('qcm', val, false, qcmAttempts);
-    setTimeout(() => {
-      wrap.querySelectorAll('.option-btn').forEach(b => {
-        b.disabled = false;
-        b.classList.remove('ok', 'ko');
-      });
-    }, 1400);
+    addBub(step.fw);
+    logM('qcm',val,false,qcmAttempts);
+    setTimeout(()=>{
+      wrap.querySelectorAll('.option-btn').forEach(b=>{b.disabled=false;b.classList.remove('ok','ko');});
+    },1500);
   }
 }
 
-function advance() {
-  const list = errors.length ? errors : sentences.map(s => ({...s, studentAnswer:'?'}));
-  const dialog = mediationDialogs[list[currentErrorIndex].context];
-  if (!dialog || currentStep >= dialog.steps.length) {
-    addBubble("Très bien ! Tu as bien réfléchi à cette difficulté. Passons à la suivante.");
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-primary';
-    btn.style.marginTop = '12px';
-    btn.textContent = 'Lacune suivante →';
-    btn.onclick = () => { currentErrorIndex++; loadMediationStep(); };
-    document.getElementById('chat-area').appendChild(btn);
+// Historique de conversation pour la boucle de correction
+let openConvHistory = [];
 
-    // Envoyer données de cette lacune
-    sendData({
-      event: 'lacune_terminee',
-      nom: studentName,
-      classe: studentClasse,
-      session: sessionId,
-      lacune_index: currentErrorIndex + 1,
-      lacune_type: list[currentErrorIndex].errorType,
-      phrase: list[currentErrorIndex].full,
-      reponse_initiale: list[currentErrorIndex].studentAnswer || '∅'
+function addTextInput(cprompt, retryMsg){
+  const area=document.getElementById('chat-area');
+  const wrap=document.createElement('div');
+  wrap.id='open-input-wrap';
+
+  // Message d'aide si on est en mode relance
+  if(retryMsg){
+    const hint=document.createElement('div');
+    hint.className='chat-bubble';
+    hint.textContent=retryMsg;
+    area.appendChild(hint);
+  }
+
+  const ta=document.createElement('textarea');
+  ta.className='student-input';
+  ta.placeholder='Écris ta réponse ici…';
+  const btn=document.createElement('button');
+  btn.className='btn btn-primary'; btn.style.marginTop='8px';
+  btn.textContent='Envoyer →';
+
+  btn.onclick=async()=>{
+    const val=ta.value.trim();
+    if(!val){ ta.style.borderColor='var(--red)'; return; }
+    btn.disabled=true; ta.disabled=true;
+    addUserBub(val);
+    logM('question_ouverte',val,null,1);
+    wrap.remove();
+    if(cprompt) await callAPI(val, cprompt);
+    else { currentStep++; nextStep(); }
+  };
+
+  wrap.appendChild(ta); wrap.appendChild(btn);
+  area.appendChild(wrap);
+  area.scrollTop=area.scrollHeight;
+}
+
+async function callAPI(studentText, cprompt){
+  const thinking=addBub('Je lis ta réponse…','thinking');
+
+  // Ajouter le message de l'apprenant dans l'historique de conversation
+  openConvHistory.push({role:'user', content:studentText});
+
+  const systemPrompt = cprompt + `
+
+RÈGLES :
+1. Ne mentionne jamais une préposition de façon isolée — intègre-la toujours dans une phrase complète.
+2. Tu es un médiateur cognitif bienveillant. Sois chaleureux et encourageant.
+3. Réponds UNIQUEMENT en JSON valide, sans texte avant ou après : {"approved": true/false, "feedback": "ton message ici"}
+
+CRITÈRES — sois généreux dans ta validation :
+- approved:true dès que l'apprenant fait un effort réel et que l'intention est correcte, même si la formulation est imparfaite. Mentionne la nuance dans le feedback si besoin, mais valide quand même.
+- approved:false UNIQUEMENT si la réponse est vide, totalement hors sujet, ou si l'apprenant écrit explicitement qu'il ne sait pas. Dans ce cas donne un exemple modèle concret et invite à reformuler brièvement.
+- En cas de doute, choisis toujours approved:true.`;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:500,
+        system: systemPrompt,
+        messages: openConvHistory
+      })
+    });
+    const d=await r.json();
+    if(thinking&&thinking.parentNode) thinking.parentNode.removeChild(thinking);
+
+    const raw=d.content&&d.content[0]&&d.content[0].text ? d.content[0].text.trim() : '{"approved":true,"feedback":"Merci, continuons."}';
+
+    let parsed;
+    try{
+      // Nettoyer les éventuels backticks markdown
+      const clean=raw.replace(/```json|```/g,'').trim();
+      parsed=JSON.parse(clean);
+    } catch(_){
+      // Si le JSON est malformé, on avance quand même
+      parsed={approved:true, feedback:raw};
+    }
+
+    // Ajouter la réponse de l'IA dans l'historique
+    openConvHistory.push({role:'assistant', content: JSON.stringify(parsed)});
+
+    if(parsed.approved){
+      // Exemples validés → bulle verte + on avance
+      addBub(parsed.feedback,'confirm');
+      currentStep++;
+      setTimeout(nextStep, 700);
+    } else {
+      // Exemples insuffisants → bulle bleue + on réaffiche la zone de saisie
+      addBub(parsed.feedback);
+      // Relancer une saisie avec le même cprompt, sans message de relance supplémentaire
+      setTimeout(()=> addTextInput(cprompt, null), 400);
+    }
+
+  } catch(e){
+    if(thinking&&thinking.parentNode) thinking.parentNode.removeChild(thinking);
+    addBub("Je n'ai pas pu analyser ta réponse. Essaie encore — écris au moins un exemple complet.");
+    setTimeout(()=> addTextInput(cprompt, null), 400);
+  }
+}
+
+// Réinitialiser l'historique de conversation ouverte à chaque nouvelle lacune
+function resetOpenConv(){ openConvHistory=[]; }
+
+function nextStep(){
+  const list=errors.length?errors
+    :sentences.flatMap(s=>s.blanks.map(b=>({sentence:s,blank:b,studentAnswer:'?'})));
+  const dlg=dialogs[list[currentErrorIndex].blank.context];
+  if(!dlg||currentStep>=dlg.steps.length){
+    addBub("Très bien ! Tu as bien réfléchi à cette difficulté. Passons à la suivante.");
+    const btn=document.createElement('button');
+    btn.className='btn btn-primary'; btn.style.marginTop='12px';
+    btn.textContent='Lacune suivante →';
+    btn.onclick=()=>{currentErrorIndex++;loadStep();};
+    document.getElementById('chat-area').appendChild(btn);
+    sendData({event:'lacune_terminee',nom:studentName,classe:studentClasse,session:sessionId,
+      lacune_index:currentErrorIndex+1,
+      type:list[currentErrorIndex].blank.categoryLabel,
+      contexte:list[currentErrorIndex].blank.context,
+      phrase_id:list[currentErrorIndex].sentence.id,
+      reponse_initiale:list[currentErrorIndex].studentAnswer||'∅'
     });
     return;
   }
-  appendAndRender(dialog.steps[currentStep]);
+  renderStep(dlg.steps[currentStep]);
 }
 
-function logInteraction(type, reponse, correct, attempts) {
-  const list = errors.length ? errors : sentences.map(s => ({...s, studentAnswer:'?'}));
-  mediationLog.push({
-    lacune: list[currentErrorIndex] ? list[currentErrorIndex].errorType : '?',
-    question_type: type,
-    reponse_eleve: reponse,
-    correct: correct,
-    tentatives: attempts || 1
-  });
+function logM(type,rep,ok,n){
+  const list=errors.length?errors:sentences.flatMap(s=>s.blanks.map(b=>({sentence:s,blank:b,studentAnswer:'?'})));
+  const item=list[currentErrorIndex];
+  mediationLog.push({lacune:item?item.blank.categoryLabel:'?',type,rep,ok,n:n||1});
 }
 
-function addBubble(text, cls) {
-  const area = document.getElementById('chat-area');
-  const d = document.createElement('div');
-  d.className = 'chat-bubble' + (cls ? ' '+cls : '');
-  d.textContent = text;
-  area.appendChild(d);
-  area.scrollTop = area.scrollHeight;
+function addBub(text,cls){
+  const area=document.getElementById('chat-area');
+  const d=document.createElement('div');
+  d.className='chat-bubble'+(cls?' '+cls:'');
+  d.textContent=text;
+  area.appendChild(d);area.scrollTop=area.scrollHeight;
+  return d;
+}
+function addUserBub(text){
+  const area=document.getElementById('chat-area');
+  const d=document.createElement('div');
+  d.className='chat-bubble user';
+  d.textContent=text;
+  area.appendChild(d);area.scrollTop=area.scrollHeight;
 }
 
-function addUserBubble(text) {
-  const area = document.getElementById('chat-area');
-  const d = document.createElement('div');
-  d.className = 'chat-bubble user';
-  d.textContent = text;
-  area.appendChild(d);
-  area.scrollTop = area.scrollHeight;
-}
-
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // NAVIGATION
-// ═══════════════════════════════════════════════════════
-function showPhase(p) {
-  ['observation','analyse','mediation'].forEach(x => {
-    document.getElementById('phase-'+x).classList.add('hidden');
-  });
-  ['obs','ana','med'].forEach(x => {
-    document.getElementById('btn-'+x).classList.remove('active');
-  });
+// ═══════════════════════════════════════════
+function showPhase(p){
+  ['observation','analyse','mediation'].forEach(x=>document.getElementById('phase-'+x).classList.add('hidden'));
+  ['obs','ana','med'].forEach(x=>document.getElementById('btn-'+x).classList.remove('active'));
   document.getElementById('phase-'+p).classList.remove('hidden');
-  const map = { observation:'obs', analyse:'ana', mediation:'med' };
-  document.getElementById('btn-'+map[p]).classList.add('active');
-  if (p === 'mediation' && !phasesDone.med) {
-    phasesDone.med = true;
-    startMediation();
-  }
+  document.getElementById('btn-'+{observation:'obs',analyse:'ana',mediation:'med'}[p]).classList.add('active');
+  if(p==='mediation') startMediation();
 }
 
-// ═══════════════════════════════════════════════════════
-// ENVOI GOOGLE SHEETS
-// ═══════════════════════════════════════════════════════
-function sendData(payload) {
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL === 'COLLEZ_ICI_L_URL_DE_VOTRE_APPS_SCRIPT') {
-    console.log('[Mode local — données non envoyées]', payload);
-    return;
-  }
-  payload.etude = NOM_ETUDE;
-  payload.timestamp = new Date().toISOString();
-
-  // Utiliser fetch avec no-cors pour éviter les erreurs CORS
-  fetch(GOOGLE_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }).catch(err => console.warn('Envoi échoué (réseau) :', err));
+// ═══════════════════════════════════════════
+// GOOGLE SHEETS
+// ═══════════════════════════════════════════
+function sendData(payload){
+  if(!GOOGLE_SCRIPT_URL||GOOGLE_SCRIPT_URL.includes('COLLEZ')){console.log('[local]',payload);return;}
+  payload.etude=NOM_ETUDE;
+  payload.timestamp=new Date().toISOString();
+  fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .catch(e=>console.warn('Réseau :',e));
 }
-
-// ═══════════════════════════════════════════════════════
-// UTILITAIRES
-// ═══════════════════════════════════════════════════════
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 </script>
 </body>
